@@ -631,56 +631,56 @@ class EudetData:
         # i : event number
         # r_max_X,Y maximum distance in X,Y between track and cluster
         # dut = iden of the Device Under Test
-
-        clusters_tmp = self.AllClusters[i]
-        good_clusters = []
-        good_cnt =0
-        for track in self.AllTracks[i] :
-            if len(clusters_tmp)!=0 :
-                dut_iden = track.iden.index(dut)
-                distances = []
-                for cluster in clusters_tmp :
-                    cluster.GetResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
-                    distances.append(sqrt(cluster.resX**2 + cluster.resY**2))
-#                if(i%250==0):
-#                    print "example of distance vector"
-#                    print [x for x in distances if x<1.]
-                cluster = clusters_tmp[distances.index(min(distances))]
-                if((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if((cluster.resX**2 + cluster.resY**2)<r_max**2) :
-                        cluster.id=good_cnt
-                        track.cluster=cluster.id
-                        cluster.tracknum=track.trackNum[dut_iden]
-                        good_clusters.append(cluster)
-                        good_cnt+=1
-#                        print "resX : %f resY : %f"%(cluster.resX,cluster.resY)
-#                        cluster.Print()
-#                        track.Print()
-                        #clusters_tmp.pop(index)
-                        #break
+        if (i<len(self.AllClusters)): #Nilou
+            clusters_tmp = self.AllClusters[i]
+            good_clusters = []
+            good_cnt =0
+            for track in self.AllTracks[i] :
+                if len(clusters_tmp)!=0 :
+                    dut_iden = track.iden.index(dut)
+                    distances = []
+                    for cluster in clusters_tmp :
+                        cluster.GetResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
+                        distances.append(sqrt(cluster.resX**2 + cluster.resY**2))
+    #                if(i%250==0):
+    #                    print "example of distance vector"
+    #                    print [x for x in distances if x<1.]
+                    cluster = clusters_tmp[distances.index(min(distances))]
+                    if((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
+                        if((cluster.resX**2 + cluster.resY**2)<r_max**2) :
+                            cluster.id=good_cnt
+                            track.cluster=cluster.id
+                            cluster.tracknum=track.trackNum[dut_iden]
+                            good_clusters.append(cluster)
+                            good_cnt+=1
+    #                        print "resX : %f resY : %f"%(cluster.resX,cluster.resY)
+    #                        cluster.Print()
+    #                        track.Print()
+                            #clusters_tmp.pop(index)
+                            #break
+                        else :
+                            track.cluster=-11
+    #                        print "Found an unmatched "
+    #                        print "resX : %f resY : %f"%(cluster.resX,cluster.resY)
+    #                        cluster.Print()
+    #                        track.Print()
                     else :
                         track.cluster=-11
-#                        print "Found an unmatched "
-#                        print "resX : %f resY : %f"%(cluster.resX,cluster.resY)
-#                        cluster.Print()
-#                        track.Print()
-                else :
-                    track.cluster=-11
-#       for u,cl1 in enumerate(good_clusters) :
-#               for v,cl2 in enumerate(good_clusters[u+1:]) :
-#                       if(cl1.tracknum==cl2.tracknum) :
-#                               if((cl1.resX**2 + cl2.resY**2)>=(cl2.resX**2 + cl2.resY**2)) :
-#                                       good_clusters.pop(v)
-#                                       break
-#                               else :
-#                                       good_clusters.pop(u)
-#                                       break
+    #       for u,cl1 in enumerate(good_clusters) :
+    #               for v,cl2 in enumerate(good_clusters[u+1:]) :
+    #                       if(cl1.tracknum==cl2.tracknum) :
+    #                               if((cl1.resX**2 + cl2.resY**2)>=(cl2.resX**2 + cl2.resY**2)) :
+    #                                       good_clusters.pop(v)
+    #                                       break
+    #                               else :
+    #                                       good_clusters.pop(u)
+    #                                       break
 
 
-        if(filter_cluster) :
-            self.AllClusters[i]=good_clusters
-        else :
-            self.AllClusters[i]=clusters_tmp
+            if(filter_cluster) :
+                self.AllClusters[i]=good_clusters
+            else :
+                self.AllClusters[i]=clusters_tmp
 
 
 
@@ -783,18 +783,18 @@ class EudetData:
 
     def ComputePosition(self,i,method="QWeighted",sigma=0.003, scaler=1):
 
-
-        for cluster in self.AllClusters[i] :
-            cluster.Statistics()
-            if (method=="QWeighted"):
-                cluster.GetQWeightedCentroid()
-            elif (method=="DigitalCentroid"):
-                cluster.GetDigitalCentroid()
-            elif (method=="maxTOT"):
-                cluster.GetMaxTOTCentroid()
-            elif (method=="EtaCorrection"):
-#                 cluster.GetEtaCorrectedQWeightedCentroid()
-                cluster.GetEtaCorrectedQWeightedCentroid(sigma)
+        if (i<len(self.AllClusters)): #Nilou
+            for cluster in self.AllClusters[i] :
+                cluster.Statistics()
+                if (method=="QWeighted"):
+                    cluster.GetQWeightedCentroid()
+                elif (method=="DigitalCentroid"):
+                    cluster.GetDigitalCentroid()
+                elif (method=="maxTOT"):
+                    cluster.GetMaxTOTCentroid()
+                elif (method=="EtaCorrection"):
+    #                 cluster.GetEtaCorrectedQWeightedCentroid()
+                    cluster.GetEtaCorrectedQWeightedCentroid(sigma)
 
 
 
