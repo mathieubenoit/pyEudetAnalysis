@@ -176,7 +176,7 @@ scaler = 1
 #n_proc= 25000
 
 
-histo_hot,histo_freq = aDataSet.FilterHotPixel(0.001,200,15)
+histo_hot,histo_freq = aDataSet.FilterHotPixel(0.01,5000,15)
 
 canhot = TCanvas()
 histo_hot.Draw("colz")
@@ -300,7 +300,7 @@ hy.Draw("colz")
 
 
 
-niter = 1
+niter = 2
 for i in range(niter) :
     resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,1,0.05,AlignementPath,1e-3,[0,0,0])
     ApplyAlignment(aDataSet,rest,resr)

@@ -955,7 +955,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     xr= np.array(Rotations)
 
     sigmas = []
-    rzs = drange(-0.1,0.1,0.01)
+    rzs = drange(-1,1,0.1)
     theRs = [x for x in rzs]
     for rZ in theRs:
         aSigma=TotalRotationFunction([0,0,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
@@ -992,7 +992,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #    print "rX: %f rY:%f rZ:%f"%(rX,rY,rZ)
 
     xr= np.array([0,0,rZ])
-    resr = minimize(TotalRotationFunction,xr,[[x_tx,x_ty],aDataSet,nevent,skip,cut],method='BFGS',options={'disp': True,'gtol': 0.00001 , 'eps':0.5, 'maxiter' : 15 })
+    resr = minimize(TotalRotationFunction,xr,[[x_tx,x_ty],aDataSet,nevent,skip,cut],method='BFGS',options={'disp': True,'gtol': 0.0000025, 'eps':0.5, 'maxiter' : 10 })
     #resr = basinhopping(TotalRotationFunction,xr,minimizer_kwargs=minimizer_kwargs,niter=200,stepsize=0.1)
     rest = minimize(TotalMeanFunctionX,x_tx,[resr.x,aDataSet,nevent,skip,cut],method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     rest2= minimize(TotalMeanFunctionY,x_ty,[rest.x[0],resr.x,aDataSet,nevent,skip,cut],method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})

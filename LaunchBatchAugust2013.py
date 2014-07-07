@@ -39,34 +39,52 @@ def FetchRuns(folder):
 
  # Important folders for the analysis (input, output, plots)
 
-data_folder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/tbtrack"
-result_folder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/pyEudetAnalysis_plots"
-LogFolder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/pyEudetAnalysis_plots/launch/Logs"
-pyEudetFolder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/pyEudetNtuples"
-Alignement_file =  ""
+#data_folder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/tbtrack"
+#result_folder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/pyEudetAnalysis_plots"
+#LogFolder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/pyEudetAnalysis_plots/launch/Logs"
+#pyEudetFolder = "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/pyEudetNtuples"
+#Alignement_file =  ""
 
 
 
 
+#########################################################################
 # Establish list of processable runs in data folder folder
 #runs=FetchRuns(data_folder)
 #runs=range(1,2)
-
-
+#########################################################################
 #runs = range(2032,2043)
-runs = range(48,52) + range(97,99) + range(150,154) + range(314,333) +range(353,388) +range(390,399)+[465,466,473,474]
-
+#runs = range(48,52) + range(97,99) + range(150,154) + range(314,333) +range(353,388) +range(390,399)+[465,466,473,474]
 # You Can filter the runs to process like this
 #runs = [x for x in runs if ( (x in range(1005,1049))]
-
 ## 1) Generate range for your data set
 #run_B04_W0110_90deg_bias_scan = range(48,67)
 #run_A06_W0110_90deg_bias_scan = range(96,154)
 #run_L05_W0125_90deg_bias_scan = range(155,184)
 #
-
 ##2) Filter only to keep run in the range you want
 #runs = [x for x in runs if ((x in run_B04_W0110_90deg_bias_scan ) or (x in run_A06_W0110_90deg_bias_scan) or (x in run_L05_W0125_90deg_bias_scan) )]
+#########################################################################
+
+
+
+#B04-W0110
+runs = [30,38,39,43,45,48,49,50,51,52,53,54,55,56,57,58,59] + range(413,421) + range(444,467)
+data_folder = "/afs/cern.ch/eng/clic/TBData/B04-W0110_Results/tbtrack"
+result_folder = "/afs/cern.ch/eng/clic/TBData/B04-W0110_Results/pyEudetPlots"
+LogFolder = "/afs/cern.ch/eng/clic/TBData/B04-W0110_Results/pyEudetPlots/launch/Logs"
+pyEudetFolder = "/afs/cern.ch/eng/clic/TBData/B04-W0110_Results/pyEudetNTuples"
+Alignement_file =  ""
+
+#A06-W0110
+runs = range(96,143)
+data_folder = "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/tbtrack"
+result_folder = "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/pyEudetPlots"
+LogFolder = "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/pyEudetPlots/launch/Logs"
+pyEudetFolder = "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/pyEudetNTuples"
+Alignement_file =  ""
+
+
 
 print "launching batch for Runs : "
 print runs
@@ -77,7 +95,7 @@ queue = "8nh"
 if(options.STEP=="Alignment"):
     queue = "1nd"
 elif(options.STEP=="Reco"):
-    queue = "8nh"
+    queue = "1nd"
 elif(options.STEP=="Analysis"):
     queue = "1nd"
 
@@ -111,10 +129,10 @@ if(options.STEP=="Alignment"):
             subLogFolder = "%s/Run%i_%s"%(LogFolder,run,method)
 
             f=open(filename,'w')
-            f.write("cd /afs/cern.ch/user/m/mbenoit/workspace/pyEudetAna \n")
+            f.write("cd /afs/cern.ch/user/m/mbenoit/workspace/pyEudetAna/trunk \n")
             f.write("source setup_CERN.sh \n")
 
-            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/Alignment/Alignment_Run%i.txt"%run
+            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/Alignment/Alignment_Run%i.txt"%run
             f.write("python ComputeAlignment.py -r %i -m %s -d %s -o %s -a %s -e %f -n %i\n"%(run,method,data_folder,pyEudetFolder,Alignement_file,0.05,15000))
             batch.append(filename)
             logs.append(subLogFolder)
@@ -128,11 +146,11 @@ elif(options.STEP=="Reco"):
             subLogFolder = "%s/Run%i_%s"%(LogFolder,run,method)
 
             f=open(filename,'w')
-            f.write("cd /afs/cern.ch/user/m/mbenoit/workspace/pyEudetAna \n")
+            f.write("cd /afs/cern.ch/user/m/mbenoit/workspace/pyEudetAna/trunk \n")
             f.write("source setup_CERN.sh \n")
 
 
-            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/Alignment/Alignment_Run%i.txt"%run
+            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/Alignment/Alignment_Run%i.txt"%run
             f.write("python pyEudetReconstructionOnly.py -r %i -m %s -d %s -o %s -a %s -e %f\n"%(run,method,data_folder,pyEudetFolder,Alignement_file,0.05))
             batch.append(filename)
             logs.append(subLogFolder)
@@ -148,12 +166,10 @@ if(options.STEP=="Analysis"):
             subLogFolder = "%s/Run%i_%s"%(LogFolder,run,method)
 
             f=open(filename,'w')
-            f.write("cd /afs/cern.ch/user/m/mbenoit/workspace/pyEudetAna \n")
+            f.write("cd /afs/cern.ch/user/m/mbenoit/workspace/pyEudetAna/trunk \n")
             f.write("source setup_CERN.sh \n")
 
-
-            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/Alignment/Alignment_Run%i.txt"%run	    
-            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/DESY_TB_DATA_August2013_results/Alignment/Alignment_Run3208.txt"
+            Alignement_file =  "/afs/cern.ch/eng/clic/TBData/A06-W0110_Results/Alignment/Alignment_Run%i.txt"%run
             f.write("python pyEudetAnalysisOnly.py -r %i -m %s -d %s -o %s -a %s -e %f \n"%(run,method,pyEudetFolder,result_folder,Alignement_file,0.1))
             batch.append(filename)
             logs.append(subLogFolder)

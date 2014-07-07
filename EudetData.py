@@ -910,9 +910,7 @@ class EudetData:
             if(len(pixels)==1):
                 c=Cluster()
                 c.addPixel(col[0],row[0],tot[0])
-                clusters=[c]
-
-        
+                clusters=[c]        
 	
 	return clusters
 
