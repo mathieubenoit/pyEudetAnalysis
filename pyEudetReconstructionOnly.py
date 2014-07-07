@@ -212,7 +212,7 @@ h1_style(trackX_vs_trackY_plan0)
 
 # Filter Hot Pixels
 # histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,200)
-histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,200,15)
+histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,n_proc,15)
 
 canhot = TCanvas()
 histo_hot.Draw("colz")

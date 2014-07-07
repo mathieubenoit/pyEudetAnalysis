@@ -2,8 +2,6 @@ import numpy as np
 from scipy.optimize import minimize,basinhopping
 from scipy.stats import skew
 from ROOT import *
-import ROOT
-from ROOT import TH1,TF1,TROOT,TStyle,TMath,TGraph
 from math import *
 from array import array
 from EudetData import *
@@ -197,10 +195,7 @@ def ComputeChargeDistance(dataSet,d=0.005,dut=6):
 #                     Y = (dataSet.AllClusters[i][track.cluster].row[maxTOTindex_tmp]*pitchY+pitchY/2.)%pitchY
 #                     X = (dataSet.AllClusters[i][track.cluster].absX)%pitchX
 #                     Y = (dataSet.AllClusters[i][track.cluster].absY)%pitchY
-                    if dataSet.AllClusters[i][track.cluster].totalTOT!=0 :
-                        Qrel = (dataSet.AllClusters[i][track.cluster].tot[maxTOTindex_tmp])/(dataSet.AllClusters[i][track.cluster].totalTOT)
-                    else :
-                        Qrel=0
+                    Qrel = (dataSet.AllClusters[i][track.cluster].tot[maxTOTindex_tmp])/(dataSet.AllClusters[i][track.cluster].totalTOT)
 #firing tracks for whom the position is in the corner of the pixel
                     if(((X<=d and Y<=d) or (X>=(pitchX-d) and Y<=d)) or ((X>=(pitchX-d) and Y>=(pitchY-d)) or (X<=d and Y>=(pitchY-d)))) :
                         continue
@@ -408,9 +403,9 @@ def TOTProfile(dataSet,nbin,dut=6):
     TOTProfileX_4.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileX_4.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileX_4.GetYaxis().SetTitle("TOT (A.U.)]")
-
-
-
+  
+ 
+    
     TOTProfileY_1 = TH2D("TOTProfileY_1_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,0.055,1000,0.,1000)
     #TOTProfileY_1.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY_1.GetXaxis().SetTitle("Track X position within pixel [mm]")
@@ -434,55 +429,55 @@ def TOTProfile(dataSet,nbin,dut=6):
     TOTProfileY_4.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_4.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileY_4.GetYaxis().SetTitle("TOT (A.U.)]")
-
+    
     TOTProfileX = TH2D("TOTProfileX_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,0.055,1000,0.,2000)
     #TOTProfileY_4.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileX.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_4.GetYaxis().SetRangeUser(0.,0.055)
-    TOTProfileX.GetYaxis().SetTitle("TOT (A.U.)]")
-
+    TOTProfileX.GetYaxis().SetTitle("TOT (A.U.)]")  
+    
     TOTProfileY = TH2D("TOTProfileY_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,0.055,1000,0.,2000)
     #TOTProfileY_4.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_4.GetYaxis().SetRangeUser(0.,0.055)
-    TOTProfileY.GetYaxis().SetTitle("TOT (A.U.)]")
-
+    TOTProfileY.GetYaxis().SetTitle("TOT (A.U.)]")     
+    
     TOTProfile= TH2D("TOTProfile","2D TOT Profile",nbin,0.,0.055,nbin,0.,0.055)
-    TOTProfileN= TH2D("TOTProfileN","2D TOT Profile N",nbin,0.,0.055,nbin,0.,0.055)
+    TOTProfileN= TH2D("TOTProfileN","2D TOT Profile N",nbin,0.,0.055,nbin,0.,0.055)  
     last_time = time.time()
-
-
+    
+    
 
     for i,tracks in enumerate(dataSet.AllTracks) :
         if(i%1000==0):
             print "Elapsed time for Hitprob Calculation , event %i: %f s"%(i,(time.time()-last_time))
         for track in tracks :
             if track.cluster!=-11 :
-                TOTProfileX.Fill((track.trackX[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
+                TOTProfileX.Fill((track.trackX[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)                   
                 TOTProfileY.Fill((track.trackY[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
-                TOTProfile.Fill((track.trackX[track.iden.index(dut)])%pitchX,(track.trackY[track.iden.index(dut)])%pitchY,dataSet.AllClusters[i][track.cluster].totalTOT)
-                TOTProfileN.Fill((track.trackX[track.iden.index(dut)])%pitchX,(track.trackY[track.iden.index(dut)])%pitchY)
+                TOTProfile.Fill((track.trackX[track.iden.index(dut)])%pitchX,(track.trackY[track.iden.index(dut)])%pitchY,dataSet.AllClusters[i][track.cluster].totalTOT) 
+                TOTProfileN.Fill((track.trackX[track.iden.index(dut)])%pitchX,(track.trackY[track.iden.index(dut)])%pitchY)                              
                 if(dataSet.AllClusters[i][track.cluster].size==1) :
                     TOTProfileX_1.Fill((track.trackX[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
                     TOTProfileY_1.Fill((track.trackY[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
-
-
+                    
+                                          
                 elif(dataSet.AllClusters[i][track.cluster].size==2) :
                     TOTProfileX_2.Fill((track.trackX[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
                     TOTProfileY_2.Fill((track.trackY[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
-
-
+                    
+                    
                 elif(dataSet.AllClusters[i][track.cluster].size==3 and (dataSet.AllClusters[i][track.cluster].sizeX==2 and dataSet.AllClusters[i][track.cluster].sizeY==2)) :
                     TOTProfileX_3.Fill((track.trackX[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
                     TOTProfileY_3.Fill((track.trackY[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
-
-
+                    
+                    
                 elif(dataSet.AllClusters[i][track.cluster].size==4 and (dataSet.AllClusters[i][track.cluster].sizeX==2 and dataSet.AllClusters[i][track.cluster].sizeY==2)) :
                     TOTProfileX_4.Fill((track.trackX[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
                     TOTProfileY_4.Fill((track.trackY[track.iden.index(dut)])%pitchX,dataSet.AllClusters[i][track.cluster].totalTOT)
-
+                    
     TOTProfileAv = TOTProfile.Clone("efficiency")
-    TOTProfileAv.Divide(TOTProfile,TOTProfileN,1.,1.,"B")
+    TOTProfileAv.Divide(TOTProfile,TOTProfileN,1.,1.,"B")             
 
     return TOTProfileX_1,TOTProfileX_2,TOTProfileX_3,TOTProfileX_4,TOTProfileY_1,TOTProfileY_2,TOTProfileY_3,TOTProfileY_4,TOTProfileX,TOTProfileY,TOTProfileAv
 #
@@ -556,12 +551,11 @@ def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
             print "Correlation, event %i %f s elapsed"%(i,time.time()-last_time)
 
         for track in tracks :
-            if(len(dataSet.AllClusters[i])!=0):
-                for index,cluster in enumerate(dataSet.AllClusters[i]) :
+            for index,cluster in enumerate(dataSet.AllClusters[i]) :
                     #cluster.Print()
-                    histox.Fill(cluster.absX,track.trackX[track.iden.index(dut)])
-                    histoy.Fill(cluster.absY,track.trackY[track.iden.index(dut)])
-#               h_dist_y_2.Fill(track.trackY[track.iden.index(dut)]-cluster.absY)
+                histox.Fill(cluster.absX,track.trackX[track.iden.index(dut)])
+                histoy.Fill(cluster.absY,track.trackY[track.iden.index(dut)])
+#		h_dist_y_2.Fill(track.trackY[track.iden.index(dut)]-cluster.absY)
 #    can = TCanvas()
 #    h_dist_y_2.Draw()
 #    a=raw_input()
@@ -705,7 +699,7 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
                     disty=cluster.absY -tmp[1]
 
                     if((distx*distx + disty*disty) < (cut*cut)):
-
+                        
                         dist_tmp_x.append(distx)
                         dist_tmp_y.append(disty)
                         n+=1
@@ -725,9 +719,9 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
 #    maxy_bin = h_dist_y_3.GetMaximumBin()
 #    maxy = h_dist_y_3.GetXaxis().GetBinCenter(maxy_bin)
 ##    Translations[0]=maxx
-#    Translations[1]=maxy
-
-
+#    Translations[1]=maxy   
+    
+    
 #     print'maxy: %f'%maxy
 #
 #
@@ -756,8 +750,8 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
 def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
 
     tmpx = TH1D("resX_2","Unbiased residual X, cluster size Y = 2",300,-0.150,0.150)
-
-
+    
+    
     for j,tracks in enumerate(dataSet.AllTracks) :
         if j%skip==0 :
             for track in tracks :
@@ -808,7 +802,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
 #param 4: position of the device under test in the list of planes
 #
 def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
-
+    
     tmpy = TH1D("resY_1","Unbiased residual Y, cluster size Y = 2",300,-0.150,0.150)
     for j,tracks in enumerate(dataSet.AllTracks) :
         if j%skip==0 :
@@ -910,10 +904,10 @@ def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,
         for index,cluster in enumerate(clusters) :
             if i%skip==0 :
                 for track in aDataSet.AllTracks[i] :
-
+                    
                     tmp=[track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)],0]
                     tmp=np.dot(RotationMatrix(Rotations),tmp)
-
+            
                     distx=cluster.absX -tmp[0]
                     disty=cluster.absY -tmp[1]
 
@@ -924,22 +918,21 @@ def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,
     can = TCanvas()
     h_dist_x_2.Draw("")
     h_dist_y_2.Draw("same")
-#    a=raw_input()
     maxx_bin = h_dist_x_2.GetMaximumBin()
     maxx = h_dist_x_2.GetXaxis().GetBinCenter(maxx_bin)
     maxy_bin = h_dist_y_2.GetMaximumBin()
     maxy = h_dist_y_2.GetXaxis().GetBinCenter(maxy_bin)
-
-
+    
+    
 
     f = open(filename,'w')
-    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(Rotations[0],Rotations[1],Rotations[2],maxx,maxy))
+    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(0,0,0,maxx,maxy))
     f.close()
 
-    print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,Rotations[0],Rotations[1],Rotations[2])
+    print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,0,0,0)
     print "Time for Prealignement : %f s"%(time.time()-last_time)
 
-    return [[Rotations[0],Rotations[1],Rotations[2],maxx,maxy]]
+    return [[0,0,0,maxx,maxy]]
 
 
 
@@ -955,47 +948,50 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     xr= np.array(Rotations)
 
     sigmas = []
-    rzs = drange(-1,1,0.1)
+    rzs = drange(-1,1,0.01)
     theRs = [x for x in rzs]
     for rZ in theRs:
         aSigma=TotalRotationFunction([0,0,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
-        if (isnan(aSigma) or isinf(aSigma)) :
+        if (isnan(aSigma) or isinf(aSigma)) : 
             sigmas.append(1e7)
-        else :
+        else : 
             sigmas.append(aSigma)
-
+  
     rZ = theRs[sigmas.index(min(sigmas))]
-
+    
     print "Optimal Z angle : %f"%rZ
-
+    
 #    sigmas = []
 #    for rY in theRs:
 #        aSigma=TotalRotationFunction([0,rY,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
-#        if isnan(aSigma) :
+#        if isnan(aSigma) : 
 #            sigmas.append(1e7)
-#        else :
-#            sigmas.append(aSigma)
+#        else : 
+#            sigmas.append(aSigma)        
 #    rY = theRs[sigmas.index(min(sigmas))]
 #    print "Optimal Y angle : %f"%rY
-#
+#      
 #    sigmas = []
 #    for rX in theRs:
 #        aSigma=TotalRotationFunction([rX,rY,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
-#        if isnan(aSigma) :
+#        if isnan(aSigma) : 
 #            sigmas.append(1e7)
-#        else :
+#        else : 
 #            sigmas.append(aSigma)
-#
+#            
 #    rX = theRs[sigmas.index(min(sigmas))]
 #    print "Optimal Z angle : %f"%rX
-#
-#    print "rX: %f rY:%f rZ:%f"%(rX,rY,rZ)
-
+#    
+#    print "rX: %f rY:%f rZ:%f"%(rX,rY,rZ) 
+       
     xr= np.array([0,0,rZ])
-    resr = minimize(TotalRotationFunction,xr,[[x_tx,x_ty],aDataSet,nevent,skip,cut],method='BFGS',options={'disp': True,'gtol': 0.0000025, 'eps':0.5, 'maxiter' : 10 })
-    #resr = basinhopping(TotalRotationFunction,xr,minimizer_kwargs=minimizer_kwargs,niter=200,stepsize=0.1)
-    rest = minimize(TotalMeanFunctionX,x_tx,[resr.x,aDataSet,nevent,skip,cut],method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
-    rest2= minimize(TotalMeanFunctionY,x_ty,[rest.x[0],resr.x,aDataSet,nevent,skip,cut],method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
+    
+    argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut        
+    resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': 0.000001 , 'eps':0.5, 'maxiter' : 15 })
+    argTuple = resr.x,aDataSet,nevent,skip,cut  
+    rest = minimize(TotalMeanFunctionX,x_tx, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
+    argTuple = rest.x[0],resr.x,aDataSet,nevent,skip,cut
+    rest2= minimize(TotalMeanFunctionY,x_ty, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
 
     f = open(filename,'a')
     f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(resr.x[0],resr.x[1],resr.x[2],rest.x[0],rest2.x[0]))
@@ -1158,7 +1154,7 @@ def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath):
     else:
         n_tracks_in_w_edge = 0
         n_tracks_in = 0
-
+        
     print "Number of tracks found in edges : %i"%(n_tracks_in_w_edge-n_tracks_in)
     print "Efficiency is : %f %%"%(efficiency*100)
     print "Efficiency in edges is : %f %%"%(efficiency_in_edge*100)
@@ -1174,7 +1170,7 @@ def ApplyGlobalEnergyCalibration(aDataSet,nevents,a,b,c,t):
     for i,clusters in enumerate(aDataSet.AllClusters[0:nevents]) :
         for j,cluster in enumerate(clusters) :
             for k,tot in enumerate(cluster.tot):
-
+                
                 cluster.tot[k] = ( t*a + tot - b + sqrt( ( b + t*a - tot )**2 + 4*a*c ) ) / (2*a) # energy in keV
 
 def ReadCalibFile(calibFile):
@@ -1183,7 +1179,7 @@ def ReadCalibFile(calibFile):
     b = [[ 0. for x in xrange(npix_X)] for x in xrange(npix_Y)]
     c = [[ 0. for x in xrange(npix_X)] for x in xrange(npix_Y)]
     t = [[ 0. for x in xrange(npix_X)] for x in xrange(npix_Y)]
-
+    
     rootfile = TFile(calibFile)
     tree = rootfile.Get("fitPara")
 
@@ -1204,7 +1200,7 @@ def ApplyPixelEnergyCalibration(aDataSet,nevents,calibFile):
     for i,clusters in enumerate(aDataSet.AllClusters[0:nevents]) :
         for j,cluster in enumerate(clusters) :
             for k in xrange(len(cluster.tot)):
-
+                
                 col = cluster.col[k]
                 row = cluster.row[k]
                 tot = cluster.tot[k]

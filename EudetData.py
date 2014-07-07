@@ -2,6 +2,8 @@ from ROOT import *
 import ROOT
 from math import fsum,fabs
 from array import array
+from scipy.cluster.hierarchy import fclusterdata
+
 import pyximport; pyximport.install(pyimport=True)
 from ROOT import TFile,TH1D,TH2D,TF1
 from Cluster import *
@@ -11,7 +13,6 @@ from Track import  *
 from Constant import *
 from ToolBox import *
 from PersistentList import *
-from scipy.cluster.hierarchy import fclusterdata
 from itertools import product
 ###############################################################################################################################
 #
