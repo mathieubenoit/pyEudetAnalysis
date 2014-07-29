@@ -322,6 +322,16 @@ class Cluster:
                         self.relX = (self.col[maxTOTindex1_tmp])*pitchX + shift1X + shift2X
                         self.relY = (self.row[maxTOTindex1_tmp])*pitchY + shift1Y - shift2Y
 
+            else : # not 2x2 -> using the simple Qweighted centroid
+                self.relX=0.
+                self.relY=0.
+                for index,tot_tmp in enumerate(self.tot) :
+                    self.relX+=(self.col[index]*pitchX + pitchX/2.)*tot_tmp
+                    self.relY+=(self.row[index]*pitchY + pitchY/2.)*tot_tmp
+                self.relX/=self.totalTOT
+                self.relY/=self.totalTOT
+
+
         else : #other cluster sizes->using the simple Qweighted centroid
             self.relX=0.
             self.relY=0.
