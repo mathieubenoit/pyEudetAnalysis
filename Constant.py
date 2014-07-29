@@ -16,7 +16,12 @@ halfChip_Y = npix_Y*pitchY/2.
 # sigma = 0.015
 um = 1e-3
 mm = 1
+cm =10
+
 
 someData_in_um = 1000*um
 
 scaler =1
+
+
+
