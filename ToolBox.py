@@ -784,7 +784,6 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
 #                            resY_cs[i-1].Fill(aCluster.resY)
 
     g2 = TF1("m1","gaus",-0.03,0.03)
-    print "entries", tmpx.GetEntries(), tmpx.GetBinContent(0), tmpx.GetBinContent(301), tmpx.GetEffectiveEntries()
     if tmpx.GetEffectiveEntries() > 10.:
         rX = tmpx.Fit(g2,"RS","")
         sigmaResX = rX.Parameter(2)
