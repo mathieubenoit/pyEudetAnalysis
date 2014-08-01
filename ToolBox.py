@@ -536,29 +536,23 @@ def ClusterHitProb(dataSet,nbin,dut=6):
 
 def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
 
-    histox = TH2D("corX","corX",(npix_X),-(npix_X)*pitchX/2.,(npix_X)*pitchX/2.,(npix_X),-(npix_X)*pitchX/2.,(npix_X)*pitchX/2.)
-    histoy = TH2D("corY","corY",(npix_Y),-(npix_Y)*pitchY/2.,(npix_Y)*pitchY/2.,(npix_Y),-(npix_Y)*pitchY/2.,(npix_Y)*pitchY/2.)
-    #h_dist_x_2 = TH1D("h_dist_x_2","TotalMeanFunctionY: dist_x",800,-10.,10.)
-    #h_dist_y_2 = TH1D("h_dist_y_2","TotalMeanFunctionY: dist_y",800,-10.,10.)
-    hl = [histox,histoy]
+    histox = TH2D("corX","Track-cluster x correlation",npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.,npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.)
+    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.,npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.)
 
-    for h in hl :
-        h.GetXaxis().SetTitle("Cluster Position (mm)")
+    for h in [histox,histoy] :
+        h.GetXaxis().SetTitle("Cluster position (mm)")
         h.GetYaxis().SetTitle("Track position (mm)")
+
     last_time = time.time()
     for i,tracks in enumerate(dataSet.AllTracks[0:imax]) :
         if(i%1000==0) :
             print "Correlation, event %i %f s elapsed"%(i,time.time()-last_time)
 
         for track in tracks :
-            for index,cluster in enumerate(dataSet.AllClusters[i]) :
-                    #cluster.Print()
-                histox.Fill(cluster.absX,track.trackX[track.iden.index(dut)])
-                histoy.Fill(cluster.absY,track.trackY[track.iden.index(dut)])
-#		h_dist_y_2.Fill(track.trackY[track.iden.index(dut)]-cluster.absY)
-#    can = TCanvas()
-#    h_dist_y_2.Draw()
-#    a=raw_input()
+            for cluster in dataSet.AllClusters[i]:
+                histox.Fill(cluster.absX, track.trackX[track.iden.index(dut)])
+                histoy.Fill(cluster.absY, track.trackY[track.iden.index(dut)])
+
     return histox,histoy
 
 

@@ -236,14 +236,13 @@ h1_style(hClusterSizeCounter)
 h1_style(hClusterSizeCounter_percent)
 
 cClusterSizeCounter = TCanvas()
-cClusterSizeCounter.cd()
 hClusterSizeCounter.Draw()
 cClusterSizeCounter.SetLogy()
 cClusterSizeCounter.SaveAs("%s/Run%i/%s/ClusterSizeCounter.pdf"%(PlotPath,RunNumber,method_name))
 
 cClusterSizeCounter_percent = TCanvas()
-cClusterSizeCounter_percent.cd()
 hClusterSizeCounter_percent.Draw()
+cClusterSizeCounter.SetLogy()
 cClusterSizeCounter_percent.SaveAs("%s/Run%i/%s/ClusterSizeCounter_percent.pdf"%(PlotPath,RunNumber,method_name))
 
 
@@ -264,15 +263,6 @@ last_time = time.time()
 hx,hy = TrackClusterCorrelation(aDataSet,6,n_proc)
 print "Elapsed time for Correlation : %f s"%(time.time()-last_time)
 
-
-if (method_name == "EtaCorrection") :
-    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
-    print "ressigmachargeX : %f"%float(ressigmachargeX)
-    print "ressigmachargeY : %f"%float(ressigmachargeY)
-
-    ApplyEtaCorrection(aDataSet,ressigmachargeX,ressigmachargeY)
-
-
 h1_style(hx,1)
 h1_style(hy,1)
 
@@ -285,15 +275,14 @@ hy.Draw("colz")
 cancory.SaveAs("%s/Run%i/%s/cory.pdf"%(PlotPath,RunNumber,method_name))
 
 
-allTOT = TH1D("allTOT","Energy Spectrum, all cluster sizes",5000,0,5000)
-TOT1 = TH1D("TOT1","Energy Spectrum, cluster size = 1",5000,0,5000)
-TOT1.SetLineColor(1)
-TOT2 = TH1D("TOT2","Energy Spectrum, cluster size = 2",5000,0,5000)
-TOT2.SetLineColor(2)
-TOT3 = TH1D("TOT3","Energy Spectrum, cluster size = 3",5000,0,5000)
-TOT3.SetLineColor(3)
-TOT4 = TH1D("TOT4","Energy Spectrum, cluster size = 4",5000,0,5000)
-TOT4.SetLineColor(4)
+
+if (method_name == "EtaCorrection") :
+    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
+    print "ressigmachargeX : %f"%float(ressigmachargeX)
+    print "ressigmachargeY : %f"%float(ressigmachargeY)
+
+    ApplyEtaCorrection(aDataSet,ressigmachargeX,ressigmachargeY)
+
 
 resX = TH1D("resX","Unbiased residual X",600,-0.150,0.150)
 resY = TH1D("resY","Unbiased residual Y",600,-0.150,0.150)
@@ -318,11 +307,6 @@ HitProb_1_correlationY,HitProb_2_correlationY,HitProb_3_correlationY,HitProb_4_c
 TOTProfileX_1_cluster_binning1m,TOTProfileX_2_cluster_binning1m,TOTProfileX_3_cluster_binning1m,TOTProfileX_4_cluster_binning1m,TOTProfileY_1_cluster_binning1m,TOTProfileY_2_cluster_binning1m,TOTProfileY_3_cluster_binning1m,TOTProfileY_4_cluster_binning1m,TOTProfileX,TOTProfileY,TOTProfile = TOTProfile(aDataSet,55,6)
 
 
-h1_style(allTOT,1)
-h1_style(TOT1,1)
-h1_style(TOT2,1)
-h1_style(TOT3,1)
-h1_style(TOT4,1)
 h1_style(resX,1)
 h1_style(resY,1)
 h1_style(HitProb_1_cluster_binning1m)
@@ -449,6 +433,16 @@ h1_style(hClusterSizeXvsSizeY)
 
 last_time = time.time()
 
+allTOT = TH1D("allTOT","TOT spectrum, all cluster sizes",5000,0,5000)
+TOT1 = TH1D("TOT1","TOT spectrum, cluster size = 1",5000,0,5000)
+TOT1.SetLineColor(1)
+TOT2 = TH1D("TOT2","TOT spectrum, cluster size = 2",5000,0,5000)
+TOT2.SetLineColor(2)
+TOT3 = TH1D("TOT3","TOT spectrum, cluster size = 3",5000,0,5000)
+TOT3.SetLineColor(3)
+TOT4 = TH1D("TOT4","TOT spectrum, cluster size = 4",5000,0,5000)
+TOT4.SetLineColor(4)
+
 if method_name == "EtaCorrection" :
 #cluster size for the eta correction method
     for j,clusters in enumerate(aDataSet.AllClusters) :
@@ -466,7 +460,6 @@ if method_name == "EtaCorrection" :
                 aCluster = aDataSet.AllClusters[j][track.cluster]
                 allTOT.Fill(aCluster.totalTOT)
                 relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
-                #print aCluster.tracknum
                 resX.Fill(aCluster.resX)
                 resY.Fill(aCluster.resY)
                 if(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
@@ -502,7 +495,6 @@ else :
                 aCluster = aDataSet.AllClusters[j][track.cluster]
                 allTOT.Fill(aCluster.totalTOT)
                 relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
-                #print aCluster.tracknum
                 resX.Fill(aCluster.resX)
                 resY.Fill(aCluster.resY)
                 hClusterSizeX.Fill(aCluster.sizeX)
@@ -579,6 +571,7 @@ resY_s4x2y2.Fit("gaus","R","",-0.03,0.03)
 canvas_resY_s4x2y2.SaveAs("%s/Run%i/%s/resY_s4x2y2.png"%(PlotPath,RunNumber,method_name))
 
 can1 = TCanvas()
+h1_style(allTOT,1)
 allTOT.Draw()
 can1.SaveAs("%s/Run%i/%s/allTOT.pdf"%(PlotPath,RunNumber,method_name))
 
@@ -716,6 +709,11 @@ can1.SaveAs("%s/Run%i/%s/allTOT.pdf"%(PlotPath,RunNumber,method_name))
 
 ###############################################################################################################################
 
+h1_style(TOT1,1)
+h1_style(TOT2,1)
+h1_style(TOT3,1)
+h1_style(TOT4,1)
+
 if ((TOT1.Integral()!=0 and TOT2.Integral()!=0) and (TOT3.Integral()!=0 and TOT4.Integral()!=0)) :
     TOT1.Scale(1./(TOT1.Integral()))
     TOT2.Scale(1./(TOT2.Integral()))
@@ -765,7 +763,7 @@ leg2.AddEntry(TOT4,"cluster size 4","l")
 leg2.SetFillColor(0)
 leg2.SetFillStyle(0)
 leg2.Draw("SAME")
-gPad.Update()
+TOT1.SetTitle("Tot spectrum")
 can2.SaveAs("%s/Run%i/%s/TOTnormalized.pdf"%(PlotPath,RunNumber,method_name))
 
 
@@ -1115,45 +1113,57 @@ can_resY_cs_1.SaveAs("%s/Run%i/%s/resY_cs_1_fit.pdf"%(PlotPath,RunNumber,method_
 out = TFile("%s/Run%i/%s/output_rootfile_distance%i.root"%(PlotPath,RunNumber,method_name,distance), "recreate")
 out.cd()
 
+h_chi2.Write()
+h_chi2ndof.Write()
+MatchedTrack.Write()
+Efficiency.Write()
+TOT_vs_edge.Write()
+TotalTrack.Write()
+for i in range(4) :
+    edge_efficiencies[i].Write()
+    edge_matched[i].Write()
+    edge_tracks[i].Write()
+hClusterSizeCounter.Write()
+hClusterSizeCounter_percent.Write()
 hx.Write()
 hy.Write()
+graph1.Write()
+QrelWrtMindistance.Write()
+resX_s2x2y2.Write()
+resY_s2x2y2.Write()
+resX_s2x1y2.Write()
+resY_s2x1y2.Write()
+resX_s2x2y1.Write()
+resY_s2x2y1.Write()
+resX_s4x2y2.Write()
+resY_s4x2y2.Write()
 allTOT.Write()
-relX_vs_relY.Write()
 TOT1.Write()
 TOT2.Write()
 TOT3.Write()
 TOT4.Write()
 resX.Write()
 resY.Write()
+for i in range(1,n_cs+2) :
+    resX_cs[i-1].Write()
+    resY_cs[i-1].Write()
 HitProb_1_cluster_binning1m.Write()
 HitProb_2_cluster_binning1m.Write()
 HitProb_3_cluster_binning1m.Write()
 HitProb_4_cluster_binning1m.Write()
-TOTProfileX_1_cluster_binning1m.Write()
-TOTProfileX_2_cluster_binning1m.Write()
-TOTProfileX_3_cluster_binning1m.Write()
-TOTProfileX_4_cluster_binning1m.Write()
-TOTProfileY_1_cluster_binning1m.Write()
-TOTProfileY_2_cluster_binning1m.Write()
-TOTProfileY_3_cluster_binning1m.Write()
-TOTProfileY_4_cluster_binning1m.Write()
-TOTProfileX.Write()
-TOTProfileY.Write()
-TOTProfile.Write()
-HitProb_1_track_binning1m.Write()
-HitProb_2_track_binning1m.Write()
-HitProb_3_track_binning1m.Write()
-HitProb_4_track_binning1m.Write()
 HitProb_1_cluster_binning2m.Write()
 HitProb_2_cluster_binning2m.Write()
 HitProb_3_cluster_binning2m.Write()
 HitProb_4_cluster_binning2m.Write()
+relX_vs_relY.Write()
+HitProb_1_track_binning1m.Write()
+HitProb_2_track_binning1m.Write()
+HitProb_3_track_binning1m.Write()
+HitProb_4_track_binning1m.Write()
 HitProb_1_track_binning2m.Write()
 HitProb_2_track_binning2m.Write()
 HitProb_3_track_binning2m.Write()
 HitProb_4_track_binning2m.Write()
-graph1.Write()
-QrelWrtMindistance.Write()
 hClusterSizeX.Write()
 hClusterSizeY.Write()
 hClusterSize.Write()
@@ -1166,26 +1176,14 @@ HitProb_1_correlationY.Write()
 HitProb_2_correlationY.Write()
 HitProb_3_correlationY.Write()
 HitProb_4_correlationY.Write()
-resX_s2x2y2.Write()
-resY_s2x2y2.Write()
-resX_s2x1y2.Write()
-resY_s2x1y2.Write()
-resX_s2x2y1.Write()
-resY_s2x2y1.Write()
-resX_s4x2y2.Write()
-resY_s4x2y2.Write()
-for i in range(1,n_cs+2) :
-    resX_cs[i-1].Write()
-    resY_cs[i-1].Write()
-hClusterSizeCounter_percent.Write()
-hClusterSizeCounter.Write()
-h_chi2.Write()
-h_chi2ndof.Write()
-TotalTrack.Write()
-MatchedTrack.Write()
-Efficiency.Write()
-TOT_vs_edge.Write()
-for i in range(4) :
-    edge_tracks[i].Write()
-    edge_matched[i].Write()
-    edge_efficiencies[i].Write()
+TOTProfileX_1_cluster_binning1m.Write()
+TOTProfileX_2_cluster_binning1m.Write()
+TOTProfileX_3_cluster_binning1m.Write()
+TOTProfileX_4_cluster_binning1m.Write()
+TOTProfileY_1_cluster_binning1m.Write()
+TOTProfileY_2_cluster_binning1m.Write()
+TOTProfileY_3_cluster_binning1m.Write()
+TOTProfileY_4_cluster_binning1m.Write()
+TOTProfileX.Write()
+TOTProfileY.Write()
+TOTProfile.Write()
