@@ -173,32 +173,33 @@ print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n
 
 
 # EdgeEfficiency
-TotalTrack,MatchedTrack,Efficiency,TOT_vs_edge,edge_plots,edge_matched = EdgeEfficiency(aDataSet,6)
+if aDataSet.edge != 0.0:
+    TotalTrack,MatchedTrack,Efficiency,TOT_vs_edge,edge_plots,edge_matched = EdgeEfficiency(aDataSet,6)
 
-eff_can = TCanvas()
-MatchedTrack.Draw("")
-eff_can.SaveAs("%s/Run%i/Edge_MatchedClusters.pdf"%(PlotPath,RunNumber))
+    eff_can = TCanvas()
+    MatchedTrack.Draw("")
+    eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedClusters.pdf"%(PlotPath,RunNumber,method_name))
 
-Efficiency.Draw("")
-eff_can.SaveAs("%s/Run%i/Edge_Efficiency.pdf"%(PlotPath,RunNumber))
+    Efficiency.Draw("")
+    eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency.pdf"%(PlotPath,RunNumber,method_name))
 
-TOT_vs_edge.Draw("colz")
-eff_can.SaveAs("%s/Run%i/Edge_TOT.pdf"%(PlotPath,RunNumber))
+    TOT_vs_edge.Draw("colz")
+    eff_can.SaveAs("%s/Run%i/%s/Edge_TOT.pdf"%(PlotPath,RunNumber,method_name))
 
-TotalTrack.Draw("")
-eff_can.SaveAs("%s/Run%i/Edge_TotalTrack.pdf"%(PlotPath,RunNumber))
+    TotalTrack.Draw("")
+    eff_can.SaveAs("%s/Run%i/%s/Edge_TotalTrack.pdf"%(PlotPath,RunNumber,method_name))
 
-edge_plots[0].Draw("")
-for i in range(1,4) :
-    edge_plots[i].Draw("same")
-eff_can.BuildLegend()
-eff_can.SaveAs("%s/Run%i/Edge_Efficiency_edge_by_edge.pdf"%(PlotPath,RunNumber))
+    edge_plots[0].Draw("")
+    for i in range(1,4) :
+        edge_plots[i].Draw("same")
+    eff_can.BuildLegend()
+    eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
 
-edge_matched[0].Draw("")
-for i in range(1,4) :
-    edge_matched[i].Draw("same")
-eff_can.BuildLegend()
-eff_can.SaveAs("%s/Run%i/Edge_Efficiency_edge_by_edge_matched.pdf"%(PlotPath,RunNumber))
+    edge_matched[0].Draw("")
+    for i in range(1,4) :
+        edge_matched[i].Draw("same")
+    eff_can.BuildLegend()
+    eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency_edge_by_edge_matched.pdf"%(PlotPath,RunNumber,method_name))
 
 
 # ComputeEfficiency
