@@ -174,11 +174,11 @@ print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n
 
 # EdgeEfficiency
 if aDataSet.edge != 0.0:
-    TotalTrack,MatchedTrack,Efficiency,TOT_vs_edge,edge_plots,edge_matched = EdgeEfficiency(aDataSet,6)
+    TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge = EdgeEfficiency(aDataSet,6)
 
     eff_can = TCanvas()
     MatchedTrack.Draw("")
-    eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedClusters.pdf"%(PlotPath,RunNumber,method_name))
+    eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedTracks.pdf"%(PlotPath,RunNumber,method_name))
 
     Efficiency.Draw("")
     eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency.pdf"%(PlotPath,RunNumber,method_name))
@@ -187,11 +187,11 @@ if aDataSet.edge != 0.0:
     eff_can.SaveAs("%s/Run%i/%s/Edge_TOT.pdf"%(PlotPath,RunNumber,method_name))
 
     TotalTrack.Draw("")
-    eff_can.SaveAs("%s/Run%i/%s/Edge_TotalTrack.pdf"%(PlotPath,RunNumber,method_name))
+    eff_can.SaveAs("%s/Run%i/%s/Edge_Tracks.pdf"%(PlotPath,RunNumber,method_name))
 
-    edge_plots[0].Draw("")
+    edge_efficiencies[0].Draw("")
     for i in range(1,4) :
-        edge_plots[i].Draw("same")
+        edge_efficiencies[i].Draw("same")
     eff_can.BuildLegend()
     eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
 
@@ -199,7 +199,13 @@ if aDataSet.edge != 0.0:
     for i in range(1,4) :
         edge_matched[i].Draw("same")
     eff_can.BuildLegend()
-    eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency_edge_by_edge_matched.pdf"%(PlotPath,RunNumber,method_name))
+    eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedTracks_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
+
+    edge_tracks[0].Draw("")
+    for i in range(1,4) :
+        edge_tracks[i].Draw("same")
+    eff_can.BuildLegend()
+    eff_can.SaveAs("%s/Run%i/%s/Edge_Tracks_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
 
 
 # ComputeEfficiency
@@ -1180,4 +1186,6 @@ MatchedTrack.Write()
 Efficiency.Write()
 TOT_vs_edge.Write()
 for i in range(4) :
-    edge_plots[i].Write()
+    edge_tracks[i].Write()
+    edge_matched[i].Write()
+    edge_efficiencies[i].Write()
