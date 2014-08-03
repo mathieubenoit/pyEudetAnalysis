@@ -536,29 +536,23 @@ def ClusterHitProb(dataSet,nbin,dut=6):
 
 def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
 
-    histox = TH2D("corX","corX",(npix_X),-(npix_X)*pitchX/2.,(npix_X)*pitchX/2.,(npix_X),-(npix_X)*pitchX/2.,(npix_X)*pitchX/2.)
-    histoy = TH2D("corY","corY",(npix_Y),-(npix_Y)*pitchY/2.,(npix_Y)*pitchY/2.,(npix_Y),-(npix_Y)*pitchY/2.,(npix_Y)*pitchY/2.)
-    #h_dist_x_2 = TH1D("h_dist_x_2","TotalMeanFunctionY: dist_x",800,-10.,10.)
-    #h_dist_y_2 = TH1D("h_dist_y_2","TotalMeanFunctionY: dist_y",800,-10.,10.)
-    hl = [histox,histoy]
+    histox = TH2D("corX","Track-cluster x correlation",npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.,npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.)
+    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.,npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.)
 
-    for h in hl :
-        h.GetXaxis().SetTitle("Cluster Position (mm)")
+    for h in [histox,histoy] :
+        h.GetXaxis().SetTitle("Cluster position (mm)")
         h.GetYaxis().SetTitle("Track position (mm)")
+
     last_time = time.time()
     for i,tracks in enumerate(dataSet.AllTracks[0:imax]) :
         if(i%1000==0) :
             print "Correlation, event %i %f s elapsed"%(i,time.time()-last_time)
 
         for track in tracks :
-            for index,cluster in enumerate(dataSet.AllClusters[i]) :
-                    #cluster.Print()
-                histox.Fill(cluster.absX,track.trackX[track.iden.index(dut)])
-                histoy.Fill(cluster.absY,track.trackY[track.iden.index(dut)])
-#		h_dist_y_2.Fill(track.trackY[track.iden.index(dut)]-cluster.absY)
-#    can = TCanvas()
-#    h_dist_y_2.Draw()
-#    a=raw_input()
+            for cluster in dataSet.AllClusters[i]:
+                histox.Fill(cluster.absX, track.trackX[track.iden.index(dut)])
+                histoy.Fill(cluster.absY, track.trackY[track.iden.index(dut)])
+
     return histox,histoy
 
 
@@ -1088,16 +1082,16 @@ def ApplyEtaCorrection(dataSet,ressigmachargeX,ressigmachargeY,dut=6,filename="E
 
 def EdgeEfficiency(aDataSet,dut) :
 
-    TotalTrack = TH1D("TotalTrack","Track Distribution in edge",50,0,aDataSet.edge)
-    MatchedTrack = TH1D("MatchedTrack","Matched Track Distribution in edge",50,0,aDataSet.edge)
-    TOT_vs_edge = TH2D("","",50,0,aDataSet.edge,200,0,1000)
+    TotalTrack = TH1D("TotalTrack","Track distribution in edge",50,0,aDataSet.edge)
+    MatchedTrack = TH1D("MatchedTrack","Matched track distribution in edge",50,0,aDataSet.edge)
+    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",50,0,aDataSet.edge,200,0,1000)
 
-    edge_matched = []
     edge_tracks = []
-    edge_plots = []
+    edge_matched = []
+    edge_efficiencies = []
     for i in range(4):
-        TotalTrack_edge = TH1D("TotalTrack_edge_%i"%i,"Track Distribution in edge",50,0,aDataSet.edge)
-        MatchedTrack_edge = TH1D("MatchedTrack_edge_%i"%i,"Matched Track Distribution in edge",50,0,aDataSet.edge)
+        TotalTrack_edge = TH1D("TotalTrack_edge_%i"%i,"Track distribution in edge %i" %i,50,0,aDataSet.edge)
+        MatchedTrack_edge = TH1D("MatchedTrack_edge_%i"%i,"Matched track distribution in edge %i" %i,50,0,aDataSet.edge)
         edge_tracks.append(TotalTrack_edge)
         edge_matched.append(MatchedTrack_edge)
 
@@ -1107,40 +1101,48 @@ def EdgeEfficiency(aDataSet,dut) :
             if(aDataSet.IsInEdges(track,dut)) :
                 if(fabs(track.trackX[track.iden.index(dut)])>halfChip_X and fabs(track.trackY[track.iden.index(dut)])<halfChip_Y):
                     TotalTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                    if(track.trackX[track.iden.index(dut)]>0) :
+                        edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                    else :
+                        edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+
                     if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
                         MatchedTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                         TOT_vs_edge.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
                         if(track.trackX[track.iden.index(dut)]>0) :
-                            edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                             edge_matched[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                         else :
-                            edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                             edge_matched[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
 
                 if(fabs(track.trackX[track.iden.index(dut)])<halfChip_X and fabs(track.trackY[track.iden.index(dut)])>halfChip_Y):
                     TotalTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                    if(track.trackY[track.iden.index(dut)]>0) :
+                        edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                    else :
+                        edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+
                     if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
                         MatchedTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                         TOT_vs_edge.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
                         if(track.trackY[track.iden.index(dut)]>0) :
-                            edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                             edge_matched[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                         else :
-                            edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                             edge_matched[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
 
 
-
     for i in range(4):
-        h = edge_matched[i].Clone()
-        h.Divide(edge_matched[i],edge_tracks[i],1.,1.,"B")
-        h.SetLineColor(i+1)
-        h.SetTitle("Side %i"%i)
-        edge_plots.append(h)
+        edge_tracks[i].SetLineColor(i+1)
         edge_matched[i].SetLineColor(i+1)
-    Efficiency = MatchedTrack.Clone("efficiency")
+        h = edge_matched[i].Clone("Efficiency")
+        h.Divide(edge_matched[i],edge_tracks[i],1.,1.,"B")
+        h.SetTitle("Efficiency in edge %i"%i)
+        edge_efficiencies.append(h)
+
+    Efficiency = MatchedTrack.Clone("Efficiency")
     Efficiency.Divide(MatchedTrack,TotalTrack,1.,1.,"B")
-    return TotalTrack,MatchedTrack,Efficiency,TOT_vs_edge,edge_plots,edge_matched
+    Efficiency.SetTitle("Efficiency")
+
+    return TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge
 
 
 
