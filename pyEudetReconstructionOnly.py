@@ -155,6 +155,8 @@ last_time=time.time()
 
 print alignment_constants
 
+distances_histo = TH1F("distances_histo","",100,0.0,1.0)
+
 for i in range(0,n_proc,scaler) :
     aDataSet.getEvent(i)
     aDataSet.ClusterEvent(i,method_name,0.003,scaler)
@@ -165,7 +167,7 @@ for i in range(0,n_proc,scaler) :
         for alignement in alignment_constants :
             ApplyAlignment_at_event(ind,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
 
-        aDataSet.FindMatchedCluster(ind,0.5 ,6)
+        aDataSet.FindMatchedCluster(ind,0.5,6,distances_histo)
         m,me=aDataSet.ComputeResiduals(ind)
         n_matched+=m
         n_matched_edge+=me
@@ -176,7 +178,13 @@ for i in range(0,n_proc,scaler) :
 
 
 print "Found %i matched cluster"%(n_matched)
-    
+
+candist = TCanvas()
+candist.SetLogy()
+distances_histo.GetXaxis().SetTitle("Track-cluster distance (mm)")
+distances_histo.Draw()
+candist.SaveAs("%s/Run%i/%s/Cluster-track_dist.pdf"%(PlotPath,RunNumber,method_name))
+
 root_file = "%s/Run%i/%s/pyEudetNtuple_run%i_%s.root"%(PlotPath,RunNumber,method_name,RunNumber,method_name)
 os.system("rm %s"%root_file)
 

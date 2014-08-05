@@ -627,76 +627,56 @@ class EudetData:
     #--------------------------------------------------------------- trackNum=[]
     #----------------------------------------------------------------- cluster=0
 
-    def FindMatchedCluster(self,i,r_max,dut=6,filter_cluster=True,TrackingRes = 0.003) :
+    def FindMatchedCluster(self,i,r_max,dut=6,distances_histo=None,filter_cluster=True,TrackingRes=0.003) :
 
-        # i : event number
-        # r_max_X,Y maximum distance in X,Y between track and cluster
-        # dut = iden of the Device Under Test
+        # i: event number
+        # r_max: maximum radial distance allowed between track and matched cluster
+        # dut: iden of the Device Under Test
 
         clusters_tmp = self.AllClusters[i]
-        good_clusters = []
-        good_cnt =0
+        matched_clusters = []
+        good_count = 0
+
         for track in self.AllTracks[i] :
             if len(clusters_tmp)!=0 :
                 dut_iden = track.iden.index(dut)
                 distances = []
+
                 for cluster in clusters_tmp :
                     cluster.GetResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
                     distances.append(sqrt(cluster.resX**2 + cluster.resY**2))
-#                if(i%250==0):
-#                    print "example of distance vector"
-#                    print [x for x in distances if x<1.]
+                    if distances_histo:
+                        distances_histo.Fill(sqrt(cluster.resX**2 + cluster.resY**2))
+
                 cluster = clusters_tmp[distances.index(min(distances))]
-                if((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if((cluster.resX**2 + cluster.resY**2)<r_max**2) :
-                        cluster.id=good_cnt
-                        track.cluster=cluster.id
-                        cluster.tracknum=track.trackNum[dut_iden]
-                        good_clusters.append(cluster)
-                        good_cnt+=1
-#                        print "resX : %f resY : %f"%(cluster.resX,cluster.resY)
-#                        cluster.Print()
-#                        track.Print()
-                        #clusters_tmp.pop(index)
-                        #break
+
+                if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
+                    if ((cluster.resX**2 + cluster.resY**2) < r_max**2) :
+                        # matched cluster
+                        cluster.id = good_count
+                        track.cluster = cluster.id
+                        cluster.tracknum = track.trackNum[dut_iden]
+                        matched_clusters.append(cluster)
+                        good_count += 1
+
                     else :
-                        track.cluster=-11
-#                        print "Found an unmatched "
-#                        print "resX : %f resY : %f"%(cluster.resX,cluster.resY)
-#                        cluster.Print()
-#                        track.Print()
+                        # unmatched cluster
+                        track.cluster = -11
+
                 else :
-                    track.cluster=-11
-#       for u,cl1 in enumerate(good_clusters) :
-#               for v,cl2 in enumerate(good_clusters[u+1:]) :
-#                       if(cl1.tracknum==cl2.tracknum) :
-#                               if((cl1.resX**2 + cl2.resY**2)>=(cl2.resX**2 + cl2.resY**2)) :
-#                                       good_clusters.pop(v)
-#                                       break
-#                               else :
-#                                       good_clusters.pop(u)
-#                                       break
+                    # track outside DUT
+                    track.cluster = -11
+
+            else :
+                # no clusters
+                track.cluster = -11
 
 
         if(filter_cluster) :
-            self.AllClusters[i]=good_clusters
+            self.AllClusters[i] = matched_clusters
         else :
-            self.AllClusters[i]=clusters_tmp
+            self.AllClusters[i] = clusters_tmp
 
-
-
-#             if(track.cluster!=-11):
-#
-#                 print "#### a Match #####"
-#                 self.AllClusters[i][track.cluster].Print()
-#                 track.Print()
-#                 print "#################"
-
-
-
-
-
-#     def ClusterEvent(self,i,method="QWeighted"):
 
 
     def DoPatternRecognition(self,i,tolerance,scale=1) :
