@@ -443,90 +443,45 @@ TOT3.SetLineColor(3)
 TOT4 = TH1D("TOT4","TOT spectrum, cluster size = 4",5000,0,5000)
 TOT4.SetLineColor(4)
 
-if method_name == "EtaCorrection" :
-#cluster size for the eta correction method
-    for j,clusters in enumerate(aDataSet.AllClusters) :
-        for i,cluster in enumerate(clusters) :
-            if len(aDataSet.AllClusters[j])!=0 :
-                aCluster = aDataSet.AllClusters[j][i]
-                hClusterSizeX.Fill(aCluster.sizeX)
-                hClusterSizeY.Fill(aCluster.sizeY)
-                hClusterSize.Fill(aCluster.size)
-                hClusterSizeXvsSizeY.Fill(aCluster.sizeX,aCluster.sizeY)
 
-    for j,tracks in enumerate(aDataSet.AllTracks) :
-        for track in tracks :
-            if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                aCluster = aDataSet.AllClusters[j][track.cluster]
-                allTOT.Fill(aCluster.totalTOT)
-                relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
-                resX.Fill(aCluster.resX)
-                resY.Fill(aCluster.resY)
-                if(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
-                    resX_s2x2y2.Fill(aCluster.resX)
-                    resY_s2x2y2.Fill(aCluster.resY)
-                elif(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==1)) :
-                    resX_s2x2y1.Fill(aCluster.resX)
-                    resY_s2x2y1.Fill(aCluster.resY)
-                elif(aCluster.size==2 and (aCluster.sizeX==1 and aCluster.sizeY==2)) :
-                    resX_s2x1y2.Fill(aCluster.resX)
-                    resY_s2x1y2.Fill(aCluster.resY)
-                elif(aCluster.size==4 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
-                    resX_s4x2y2.Fill(aCluster.resX)
-                    resY_s4x2y2.Fill(aCluster.resY)
+for j,tracks in enumerate(aDataSet.AllTracks) :
+    for track in tracks :
+        if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
+            aCluster = aDataSet.AllClusters[j][track.cluster]
+            allTOT.Fill(aCluster.totalTOT)
+            relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
+            resX.Fill(aCluster.resX)
+            resY.Fill(aCluster.resY)
+            hClusterSizeX.Fill(aCluster.sizeX)
+            hClusterSizeY.Fill(aCluster.sizeY)
+            hClusterSize.Fill(aCluster.size)
+            hClusterSizeXvsSizeY.Fill(aCluster.sizeX,aCluster.sizeY)
+            if(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
+                resX_s2x2y2.Fill(aCluster.resX)
+                resY_s2x2y2.Fill(aCluster.resY)
+            elif(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==1)) :
+                resX_s2x2y1.Fill(aCluster.resX)
+                resY_s2x2y1.Fill(aCluster.resY)
+            elif(aCluster.size==2 and (aCluster.sizeX==1 and aCluster.sizeY==2)) :
+                resX_s2x1y2.Fill(aCluster.resX)
+                resY_s2x1y2.Fill(aCluster.resY)
+            elif(aCluster.size==4 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
+                resX_s4x2y2.Fill(aCluster.resX)
+                resY_s4x2y2.Fill(aCluster.resY)
 
-                for i in range(1,n_cs+2) :
-                    if(aCluster.sizeX==i) :
-                        resX_cs[i-1].Fill(aCluster.resX)
-                    if(aCluster.sizeY==i) :
-                        resY_cs[i-1].Fill(aCluster.resY)
-                if(aCluster.size==1) :
-                    TOT1.Fill(aCluster.totalTOT)
-                if(aCluster.size==2) :
-                    TOT2.Fill(aCluster.totalTOT)
-                if(aCluster.size==3) :
-                    TOT3.Fill(aCluster.totalTOT)
-                if(aCluster.size==4) :
-                    TOT4.Fill(aCluster.totalTOT)
-else :
-    for j,tracks in enumerate(aDataSet.AllTracks) :
-        for track in tracks :
-            if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                aCluster = aDataSet.AllClusters[j][track.cluster]
-                allTOT.Fill(aCluster.totalTOT)
-                relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
-                resX.Fill(aCluster.resX)
-                resY.Fill(aCluster.resY)
-                hClusterSizeX.Fill(aCluster.sizeX)
-                hClusterSizeY.Fill(aCluster.sizeY)
-                hClusterSize.Fill(aCluster.size)
-                hClusterSizeXvsSizeY.Fill(aCluster.sizeX,aCluster.sizeY)
-                if(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
-                    resX_s2x2y2.Fill(aCluster.resX)
-                    resY_s2x2y2.Fill(aCluster.resY)
-                elif(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==1)) :
-                    resX_s2x2y1.Fill(aCluster.resX)
-                    resY_s2x2y1.Fill(aCluster.resY)
-                elif(aCluster.size==2 and (aCluster.sizeX==1 and aCluster.sizeY==2)) :
-                    resX_s2x1y2.Fill(aCluster.resX)
-                    resY_s2x1y2.Fill(aCluster.resY)
-                elif(aCluster.size==4 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
-                    resX_s4x2y2.Fill(aCluster.resX)
-                    resY_s4x2y2.Fill(aCluster.resY)
-
-                for i in range(1,n_cs+2) :
-                    if(aCluster.sizeX==i) :
-                        resX_cs[i-1].Fill(aCluster.resX)
-                    if(aCluster.sizeY==i) :
-                        resY_cs[i-1].Fill(aCluster.resY)
-                if(aCluster.size==1) :
-                    TOT1.Fill(aCluster.totalTOT)
-                if(aCluster.size==2) :
-                    TOT2.Fill(aCluster.totalTOT)
-                if(aCluster.size==3) :
-                    TOT3.Fill(aCluster.totalTOT)
-                if(aCluster.size==4) :
-                    TOT4.Fill(aCluster.totalTOT)
+            for i in range(1,n_cs+2) :
+                if(aCluster.sizeX==i) :
+                    resX_cs[i-1].Fill(aCluster.resX)
+                if(aCluster.sizeY==i) :
+                    resY_cs[i-1].Fill(aCluster.resY)
+            if(aCluster.size==1) :
+                TOT1.Fill(aCluster.totalTOT)
+            if(aCluster.size==2) :
+                TOT2.Fill(aCluster.totalTOT)
+            if(aCluster.size==3) :
+                TOT3.Fill(aCluster.totalTOT)
+            if(aCluster.size==4) :
+                TOT4.Fill(aCluster.totalTOT)
 print "Elapsed time for Residual, cluster and TOT plots: %f s"%(time.time()-last_time)
 
 
