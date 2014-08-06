@@ -129,6 +129,12 @@ scaler = 1
 
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
+
+    if n_proc >= aDataSet.t_nEntries:
+        n_proc = -1
+    if n_proc == -1:
+        n_proc = aDataSet.t_nEntries
+
 else :
     n_proc= aDataSet.t_nEntries
 
@@ -167,7 +173,7 @@ for i in range(0,n_proc,scaler) :
         for alignement in alignment_constants :
             ApplyAlignment_at_event(ind,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
 
-        aDataSet.FindMatchedCluster(ind,0.5,6,distances_histo)
+        aDataSet.FindMatchedCluster(ind,0.1,6,distances_histo)
         m,me=aDataSet.ComputeResiduals(ind)
         n_matched+=m
         n_matched_edge+=me
