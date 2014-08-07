@@ -492,23 +492,24 @@ class EudetData:
 
     def ComputeResiduals(self,i,dut=6) :
 
-        nmatch = 0.
-        nmatch_edge = 0
+        nmatch_in_main = 0.
+        nmatch_in_edge = 0.
+
         for track in self.AllTracks[i] :
             if(i<len(self.AllClusters)) :
-                for index,cluster in enumerate(self.AllClusters[i]) :
-                #print "looking at track with id %i and cluster with id %i"%(track.cluster,cluster.id)
+                for cluster in self.AllClusters[i] :
+
                     if cluster.id == track.cluster  :
                         cluster.GetResiduals(track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)])
-                        #print "after match resX : %f resY : %f"%(cluster.resX,cluster.resY)
-                        nmatch+=1
-                        if(self.IsInEdges(track)):
-                            nmatch_edge+=1
 
-        return nmatch,nmatch_edge
-#     def ComputeResiduals(self,i) :
-#         for cluster in self.AllClusters[i] :
-#             cluster.GetResiduals(self.t_posX[3],self.t_posY[3])
+                        if(self.IsInEdges(track)):
+                            nmatch_in_edge += 1.
+                        else:
+                            nmatch_in_main += 1.
+
+        return nmatch_in_main, nmatch_in_edge
+
+
 
     def PrintResiduals(self,i) :
         print "###################### Event : %d ######################"%i
@@ -762,8 +763,7 @@ class EudetData:
 
 
 
-    def ComputePosition(self,i,method="QWeighted",sigma=0.003, scaler=1):
-
+    def ComputePosition(self,i,method="QWeighted",sigma=0.003):
 
         for cluster in self.AllClusters[i] :
             cluster.Statistics()
@@ -774,7 +774,6 @@ class EudetData:
             elif (method=="maxTOT"):
                 cluster.GetMaxTOTCentroid()
             elif (method=="EtaCorrection"):
-#                 cluster.GetEtaCorrectedQWeightedCentroid()
                 cluster.GetEtaCorrectedQWeightedCentroid(sigma)
 
 

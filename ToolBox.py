@@ -31,12 +31,11 @@ def drange(start, stop, step):
         yield r
         r += step
 
-#
-#Count the number of clusters for the different topologies and draw histograms of the results
-#parameter: a data set (class EudetData)
-#
-def CountPixelSize(dataSet):
-    n_s1x1y1 = 0.#number of clusters with cluster size = 1 : cluster sizeX = 1 : cluster sizeY = 1
+
+def CountClusterSize(dataSet):
+    # Count the number of clusters for the different topologies and draw histograms of the results
+
+    n_s1x1y1 = 0.
     n_s2x1y2 = 0.
     n_s2x2y1 = 0.
     n_s2x2y2 = 0.
@@ -44,27 +43,39 @@ def CountPixelSize(dataSet):
     n_s4x2y2 = 0.
     n_else = 0.
 
+    hClusterSize = TH1D("hClusterSize","Cluster size distribution",4,1,5)
+    hClusterSizeX = TH1D("hClusterSizeX","Cluster size X distribution",4,1,5)
+    hClusterSizeY = TH1D("hClusterSizeY","Cluster size Y distribution",4,1,5)
+    hClusterSizeXvsSizeY = TH2D("hClusterSizeXvsSizeY","Cluster size X vs Y distribution",4,1,5,4,1,5)
+
     last_time = time.time()
 
     for i,tracks in enumerate(dataSet.AllTracks) :
         for track in tracks :
-            if track.cluster!=-11 :
-                if(dataSet.AllClusters[i][track.cluster].size==1) :
+            if track.cluster!=-11 and len(dataSet.AllClusters[i])!=0 :
+                aCluster = dataSet.AllClusters[i][track.cluster]
+
+                hClusterSize.Fill(aCluster.size)
+                hClusterSizeX.Fill(aCluster.sizeX)
+                hClusterSizeY.Fill(aCluster.sizeY)
+                hClusterSizeXvsSizeY.Fill(aCluster.sizeX, aCluster.sizeY)
+
+                if(aCluster.size==1) :
                     n_s1x1y1 = n_s1x1y1 + 1.
-                elif(dataSet.AllClusters[i][track.cluster].size==2 and (dataSet.AllClusters[i][track.cluster].sizeY==2 and dataSet.AllClusters[i][track.cluster].sizeX==1)) :
+                elif(aCluster.size==2 and aCluster.sizeY==2 and aCluster.sizeX==1) :
                     n_s2x1y2 = n_s2x1y2 + 1.
-                elif(dataSet.AllClusters[i][track.cluster].size==2 and (dataSet.AllClusters[i][track.cluster].sizeY==1 and dataSet.AllClusters[i][track.cluster].sizeX==2)) :
+                elif(aCluster.size==2 and aCluster.sizeY==1 and aCluster.sizeX==2) :
                     n_s2x2y1 = n_s2x2y1 + 1.
-                elif(dataSet.AllClusters[i][track.cluster].size==2 and (dataSet.AllClusters[i][track.cluster].sizeY==2 and dataSet.AllClusters[i][track.cluster].sizeX==2)) :
+                elif(aCluster.size==2 and aCluster.sizeY==2 and aCluster.sizeX==2) :
                     n_s2x2y2 = n_s2x2y2 + 1.
-                elif(dataSet.AllClusters[i][track.cluster].size==3 and (dataSet.AllClusters[i][track.cluster].sizeY==2 and dataSet.AllClusters[i][track.cluster].sizeX==2)) :
+                elif(aCluster.size==3 and aCluster.sizeY==2 and aCluster.sizeX==2) :
                     n_s3x2y2 = n_s3x2y2 + 1.
-                elif(dataSet.AllClusters[i][track.cluster].size==4 and (dataSet.AllClusters[i][track.cluster].sizeY==2 and dataSet.AllClusters[i][track.cluster].sizeX==2)) :
+                elif(aCluster.size==4 and aCluster.sizeY==2 and aCluster.sizeX==2) :
                     n_s4x2y2 = n_s4x2y2 + 1.
                 else :
                     n_else = n_else + 1.
 
-                if(i%1000==0):
+                if(i%10000==0):
                     print "Elapsed time for Counting Cluster Size , event %i: %f s"%(i,(time.time()-last_time))
 
 
@@ -78,10 +89,15 @@ def CountPixelSize(dataSet):
         print"cluster sizes percentage..."
         print size
 
+    hClusterSize.GetXaxis().SetTitle("Cluster size")
+    hClusterSizeX.GetXaxis().SetTitle("Cluster size X")
+    hClusterSizeY.GetXaxis().SetTitle("Cluster size Y")
+    hClusterSizeXvsSizeY.GetXaxis().SetTitle("Cluster size X")
+    hClusterSizeXvsSizeY.GetYaxis().SetTitle("Cluster size Y")
 
-    hClusterSizeCounter = TH1D("ClusterSizeCounter","Number of the clusters for different cluster sizes",7,0.,7.)
-    hClusterSizeCounter.GetXaxis().SetTitle("cluster size")
-    hClusterSizeCounter.GetYaxis().SetTitle("number of events")
+    hClusterSizeCounter = TH1D("hClusterSizeCounter","Number of clusters for different sizes",7,0.,7.)
+    hClusterSizeCounter.GetXaxis().SetTitle("Cluster size")
+    hClusterSizeCounter.GetYaxis().SetTitle("Number of events")
 
     hClusterSizeCounter.SetBinContent(1,n_s1x1y1)
     hClusterSizeCounter.SetBinContent(2,n_s2x1y2)
@@ -100,9 +116,9 @@ def CountPixelSize(dataSet):
     hClusterSizeCounter.GetXaxis().SetBinLabel(7,"else")
     hClusterSizeCounter.SetStats(0)
 
-    hClusterSizeCounter_percent = TH1D("ClusterSizeCounter_percent","Percentage of the clusters for different cluster sizes",7,0.,7.)
-    hClusterSizeCounter_percent.GetXaxis().SetTitle("cluster size")
-    hClusterSizeCounter_percent.GetYaxis().SetTitle("number of events (%)")
+    hClusterSizeCounter_percent = TH1D("hClusterSizeCounter_percent","Percentage of clusters for different sizes",7,0.,7.)
+    hClusterSizeCounter_percent.GetXaxis().SetTitle("Cluster size")
+    hClusterSizeCounter_percent.GetYaxis().SetTitle("Percent of events")
 
     hClusterSizeCounter_percent.SetBinContent(1,n_s1x1y1/n_tot*100.)
     hClusterSizeCounter_percent.SetBinContent(2,n_s2x1y2/n_tot*100.)
@@ -121,7 +137,7 @@ def CountPixelSize(dataSet):
     hClusterSizeCounter_percent.GetXaxis().SetBinLabel(7,"else")
     hClusterSizeCounter_percent.SetStats(0)
 
-    return hClusterSizeCounter,hClusterSizeCounter_percent
+    return hClusterSize, hClusterSizeX, hClusterSizeY, hClusterSizeXvsSizeY, hClusterSizeCounter,hClusterSizeCounter_percent
 
 
 
@@ -1147,26 +1163,41 @@ def EdgeEfficiency(aDataSet,dut) :
 
 
 def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath):
-    n_tracks_in_w_edge = ComputeDetectorAcceptance(aDataSet,6,edge)
-    n_tracks_in = ComputeDetectorAcceptance(aDataSet,6,0)
+    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,6,edge)
+    n_tracks_in_main = ComputeDetectorAcceptance(aDataSet,6,0)
+    n_tracks_in_edge = n_tracks_in_total - n_tracks_in_main
 
+    print "n_tracks_in_total", n_tracks_in_total
+    print "n_tracks_in_main", n_tracks_in_main
+    print "n_tracks_in_edge", n_tracks_in_edge
+
+    efficiency_in_main = 0.
     efficiency_in_edge = 0.
-    efficiency = 0.
+    efficiency_in_total = 0.
 
-    if n_tracks_in_w_edge != n_tracks_in:
-        efficiency_in_edge = float(n_matched_edge)/(n_tracks_in_w_edge-n_tracks_in)
-        efficiency = float(n_matched)/n_tracks_in_w_edge
+    if n_tracks_in_main != 0 :
+        efficiency_in_main = float(n_matched)/n_tracks_in_main
     else:
-        n_tracks_in_w_edge = 0
-        n_tracks_in = 0
-        
-    print "Number of tracks found in edges : %i"%(n_tracks_in_w_edge-n_tracks_in)
-    print "Efficiency is : %f %%"%(efficiency*100)
-    print "Efficiency in edges is : %f %%"%(efficiency_in_edge*100)
+        efficiency_in_main = 0.
+
+    if n_tracks_in_edge != 0 :
+        efficiency_in_edge = float(n_matched_edge)/n_tracks_in_edge
+    else:
+        efficiency_in_edge = 0.
+
+    if n_tracks_in_total != 0. :
+        efficiency_in_total = float(n_matched + n_matched_edge)/n_tracks_in_total
+    else:
+        efficiency_in_total = 0.
+       
+    print "Efficiency in main : %f %%"%(efficiency_in_main*100)
+    print "Efficiency in edge : %f %%"%(efficiency_in_edge*100)
+    print "Efficiency in total : %f %%"%(efficiency_in_total*100)
 
     f = open("%s/Efficiency.txt"%PlotPath,'w')
-    f.write("Efficiency excluding track in edges is : %f %%"%(efficiency*100))
-    f.write("Efficiency including track in edges is : %f %%"%(efficiency_in_edge*100))
+    f.write("Efficiency in main : %f %%"%(efficiency_in_main*100))
+    f.write("Efficiency in edge : %f %%"%(efficiency_in_edge*100))
+    f.write("Efficiency in total : %f %%"%(efficiency_in_total*100))
     f.close()
 
 
