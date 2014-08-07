@@ -196,7 +196,7 @@ class EudetData:
 #                    counter_tmp+=1
 #                    print "adding %i %i , counter = %i %i"%(self.p_col[jj],self.p_row[jj],counter_tmp,self.hit_map[self.p_col[jj]][self.p_row[jj]])
 
-            nevent_tmp+=1
+            nevent_tmp += 1./scaler
 
 
 

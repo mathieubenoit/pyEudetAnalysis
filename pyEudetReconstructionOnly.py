@@ -142,7 +142,7 @@ print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n
 
 
 # Filter Hot Pixels
-histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,n_proc,15)
+histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,-1,15)
 
 canhot = TCanvas()
 histo_hot.Draw("colz")
