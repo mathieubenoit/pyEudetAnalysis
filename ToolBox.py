@@ -1163,26 +1163,41 @@ def EdgeEfficiency(aDataSet,dut) :
 
 
 def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath):
-    n_tracks_in_w_edge = ComputeDetectorAcceptance(aDataSet,6,edge)
-    n_tracks_in = ComputeDetectorAcceptance(aDataSet,6,0)
+    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,6,edge)
+    n_tracks_in_main = ComputeDetectorAcceptance(aDataSet,6,0)
+    n_tracks_in_edge = n_tracks_in_total - n_tracks_in_main
 
+    print "n_tracks_in_total", n_tracks_in_total
+    print "n_tracks_in_main", n_tracks_in_main
+    print "n_tracks_in_edge", n_tracks_in_edge
+
+    efficiency_in_main = 0.
     efficiency_in_edge = 0.
-    efficiency = 0.
+    efficiency_in_total = 0.
 
-    if n_tracks_in_w_edge != n_tracks_in:
-        efficiency_in_edge = float(n_matched_edge)/(n_tracks_in_w_edge-n_tracks_in)
-        efficiency = float(n_matched)/n_tracks_in_w_edge
+    if n_tracks_in_main != 0 :
+        efficiency_in_main = float(n_matched)/n_tracks_in_main
     else:
-        n_tracks_in_w_edge = 0
-        n_tracks_in = 0
-        
-    print "Number of tracks found in edges : %i"%(n_tracks_in_w_edge-n_tracks_in)
-    print "Efficiency is : %f %%"%(efficiency*100)
-    print "Efficiency in edges is : %f %%"%(efficiency_in_edge*100)
+        efficiency_in_main = 0.
+
+    if n_tracks_in_edge != 0 :
+        efficiency_in_edge = float(n_matched_edge)/n_tracks_in_edge
+    else:
+        efficiency_in_edge = 0.
+
+    if n_tracks_in_total != 0. :
+        efficiency_in_total = float(n_matched + n_matched_edge)/n_tracks_in_total
+    else:
+        efficiency_in_total = 0.
+       
+    print "Efficiency in main : %f %%"%(efficiency_in_main*100)
+    print "Efficiency in edge : %f %%"%(efficiency_in_edge*100)
+    print "Efficiency in total : %f %%"%(efficiency_in_total*100)
 
     f = open("%s/Efficiency.txt"%PlotPath,'w')
-    f.write("Efficiency excluding track in edges is : %f %%"%(efficiency*100))
-    f.write("Efficiency including track in edges is : %f %%"%(efficiency_in_edge*100))
+    f.write("Efficiency in main : %f %%"%(efficiency_in_main*100))
+    f.write("Efficiency in edge : %f %%"%(efficiency_in_edge*100))
+    f.write("Efficiency in total : %f %%"%(efficiency_in_total*100))
     f.close()
 
 

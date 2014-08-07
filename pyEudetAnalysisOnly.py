@@ -209,25 +209,26 @@ if aDataSet.edge != 0.0:
 
 
 # ComputeEfficiency
-n_matched = 0
-n_matched_edge = 0
+n_matched_in_main = 0
+n_matched_in_edge = 0
 last_time = time.time()
 
 for i in range(n_proc-1) :
-    aDataSet.FindMatchedCluster(i,0.50 ,6)
-    aDataSet.ComputePosition(i,method_name,0.005,15)
-    m,me=aDataSet.ComputeResiduals(i)
-    n_matched+=m
-    n_matched_edge+=me
-    if i%1000 ==0 :
+    aDataSet.FindMatchedCluster(i,0.1,6)
+    aDataSet.ComputePosition(i,method_name,0.003)
+    m,me = aDataSet.ComputeResiduals(i)
+    n_matched_in_main += m
+    n_matched_in_edge += me
+
+    if i%10000 ==0 :
         print "Event %d"%i
-        print "Elapsed time/1000 Event : %f s"%(time.time()-last_time)
+        print "Elapsed time/10000 Event : %f s"%(time.time()-last_time)
         last_time = time.time()
 
-print "Found %i matched track-cluster binome"%n_matched
+print "Found %i matched track-cluster binome in main" %n_matched_in_main
+print "And %i matched track-cluster binome in edges" %n_matched_in_edge
 
-if n_matched!=0 :
-    ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge_width,"%s/Run%i/%s"%(PlotPath,RunNumber,method_name))
+ComputeEfficiency(aDataSet,n_matched_in_main,n_matched_in_edge,edge_width,"%s/Run%i/%s"%(PlotPath,RunNumber,method_name))
 
 
 # CountClusterSize
