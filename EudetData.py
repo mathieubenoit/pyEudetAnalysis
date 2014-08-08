@@ -176,6 +176,10 @@ class EudetData:
 
         if Nevents>self.p_nEntries or Nevents==-1:
             n_max = self.p_nEntries
+        elif Nevents < 10000:
+            print "FilterHotPixel over-riding requested nevents"
+            print "FilterHotPixel must be run on atleast 10000 events (for a threshold of 0.01) to be accurate"
+            n_max = 10000
         else :
             n_max = Nevents
 
