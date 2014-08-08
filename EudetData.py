@@ -633,10 +633,9 @@ class EudetData:
     #----------------------------------------------------------------- cluster=0
 
     def FindMatchedCluster(self,i,r_max,dut=6,distances_histo=None,filter_cluster=True,TrackingRes=0.003) :
-
-        # i: event number
-        # r_max: maximum radial distance allowed between track and matched cluster
-        # dut: iden of the Device Under Test
+        # find the clusters closest to the tracks in this event
+        # clusters are matched to tracks using GetPixelResiduals
+        # r_max: maximum radial distance allowed between track and any pixel of the cluster
 
         clusters_tmp = self.AllClusters[i]
         matched_clusters = []
@@ -648,15 +647,16 @@ class EudetData:
                 distances = []
 
                 for cluster in clusters_tmp :
-                    cluster.GetResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
-                    distances.append(sqrt(cluster.resX**2 + cluster.resY**2))
+                    mdr, mdx, mdy = cluster.GetPixelResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
+                    distances.append(mdr)
+
                     if distances_histo:
-                        distances_histo.Fill(sqrt(cluster.resX**2 + cluster.resY**2))
+                        distances_histo.Fill(mdr)
 
                 cluster = clusters_tmp[distances.index(min(distances))]
 
                 if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if ((cluster.resX**2 + cluster.resY**2) < r_max**2) :
+                    if (min(distances) < r_max) :
                         # matched cluster
                         cluster.id = good_count
                         track.cluster = cluster.id
