@@ -180,43 +180,30 @@ def ComputeDetectorAcceptance(dataSet, dut=6, edges = 0):
     return n_tracks_in
 
 
-#
-#compute the smaller distance between the hit with higher energy and the pixel edge
-#first parameter: a data set (class EudetData)
-#second parameter: minimal distance between the track position and the pixel edge. This value is also used to fire the tracks which are in the corner of the pixel
-#third parameter:  position of the device under test in the list of planes
-#
+
 def ComputeChargeDistance(dataSet,d=0.005,dut=6):
-    AllDistances = [0.]
-    AllCharges = [0.]
+    # Compute the distance between the track and the edge of the pixel with highest energy
+    # d: the value is used to remove the tracks which are in the corner of the pixel
+
+    QrelWrtMindistance = TH2D("QrelWrtMindistance","",110,0,0.0275,100,0.5,1)
 
     for i,tracks in enumerate(dataSet.AllTracks) :
         for track in tracks :
             if track.cluster!=-11 :
-                if(dataSet.AllClusters[i][track.cluster].size==2) :
-                    maxTOTindex_tmp=0
-                    maxTOT_tmp=dataSet.AllClusters[i][track.cluster].tot[0]
-#looking for the pixel with the highest energy
-                    for index,tot_tmp in enumerate(dataSet.AllClusters[i][track.cluster].tot) :
-#                         print "tot_tmp : "
-#                         print tot_tmp
-                        if dataSet.AllClusters[i][track.cluster].tot[index]>maxTOT_tmp:
-                            maxTOT_tmp=dataSet.AllClusters[i][track.cluster].tot[index]
-                            maxTOTindex_tmp=index
+                if(dataSet.AllClusters[i][track.cluster].size==2 and dataSet.AllClusters[i][track.cluster].aspectRatio!=1) :
 
-#computing the track positions X and Y in the pixel and the relative charge i.e. Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
+                    cluster = dataSet.AllClusters[i][track.cluster]
+
+                    # computing the track positions X and Y in the pixel and the relative charge 
                     X = (track.trackX[track.iden.index(dut)])%pitchX
                     Y = (track.trackY[track.iden.index(dut)])%pitchY
-#                     X = (dataSet.AllClusters[i][track.cluster].col[maxTOTindex_tmp]*pitchX+pitchX/2.)%pitchX
-#                     Y = (dataSet.AllClusters[i][track.cluster].row[maxTOTindex_tmp]*pitchY+pitchY/2.)%pitchY
-#                     X = (dataSet.AllClusters[i][track.cluster].absX)%pitchX
-#                     Y = (dataSet.AllClusters[i][track.cluster].absY)%pitchY
-                    Qrel = (dataSet.AllClusters[i][track.cluster].tot[maxTOTindex_tmp])/(dataSet.AllClusters[i][track.cluster].totalTOT)
-#firing tracks for whom the position is in the corner of the pixel
-                    if(((X<=d and Y<=d) or (X>=(pitchX-d) and Y<=d)) or ((X>=(pitchX-d) and Y>=(pitchY-d)) or (X<=d and Y>=(pitchY-d)))) :
+                    Qrel = max(cluster.tot) / cluster.totalTOT
+
+                    if ((X<=d and Y<=d) or (X>=(pitchX-d) and Y<=d) or (X>=(pitchX-d) and Y>=(pitchY-d)) or (X<=d and Y>=(pitchY-d))):
+                        # removing tracks in the corners of the pixel
                         continue
                     else :
-#finding the region of the track in the pixel and computing the minimal distance between the track position and the pixel edge
+                        # computing the distance between the track and the closest pixel edge
                         if(Y<X and Y<(-X+pitchY)):
                             d = Y
                         elif(Y<X and Y>=(-X+pitchY)):
@@ -226,30 +213,9 @@ def ComputeChargeDistance(dataSet,d=0.005,dut=6):
                         elif(Y>=X and Y>=(-X+pitchY)):
                             d = pitchY - Y
 
-#checking computations...
-#                     print "maxTOTindex_tmp : "
-#                     print maxTOTindex_tmp
-#                     print "dataSet.AllClusters[i][track.cluster].col[maxTOTindex_tmp] : "
-#                     print dataSet.AllClusters[i][track.cluster].col[maxTOTindex_tmp]
-#                     print "dataSet.AllClusters[i][track.cluster].tot[maxTOTindex_tmp] : "
-#                     print dataSet.AllClusters[i][track.cluster].tot[maxTOTindex_tmp]
-#                     print "dataSet.AllClusters[i][track.cluster].totalTOT : "
-#                     print dataSet.AllClusters[i][track.cluster].totalTOT
-#                     print "X : "
-#                     print X
-#                     print "Y : "
-#                     print Y
-#                     print "Qrel : "
-#                     print Qrel
-#                     print "d : "
-#                     print d
+                        QrelWrtMindistance.Fill(d, Qrel)
 
-#adding points to the list of Qrel and minDistances
-                    AllDistances.append(d)
-                    AllCharges.append(Qrel)
-#     print AllDistances
-#     print AllCharges
-    return AllDistances,AllCharges
+    return QrelWrtMindistance
 
 
 #

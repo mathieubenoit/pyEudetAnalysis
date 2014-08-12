@@ -362,29 +362,16 @@ h1_style(HitProb_4_correlationY)
 
 
 
-distance = 4 #microns
-print "Compute charge distance..."
-print distance*0.001
-AllDistances,AllCharges = ComputeChargeDistance(aDataSet,distance*0.001)
-graph1 = TGraph(len(AllDistances))
-QrelWrtMindistance = TH2D("QrelWrtMindistance","Relative charge as a function of the minimal distance to the pixel edge",110,0,0.0275,100,0.5,1)
-for i,point in enumerate(AllDistances) :
-    graph1.SetPoint(i,AllDistances[i],AllCharges[i])
-    QrelWrtMindistance.Fill(AllDistances[i],AllCharges[i])
+print "ComputeChargeDistance"
+QrelWrtMindistance = ComputeChargeDistance(aDataSet,0.004)
 
 canEtaCorr = TCanvas()
-graph1.Draw("ap")
-graph1.GetXaxis().SetTitle("minimal distance (mm)")
-graph1.GetYaxis().SetTitle("relative charge")
-TGraph_style(graph1)
-canEtaCorr.SaveAs("%s/Run%i/%s/Eta.pdf"%(PlotPath,RunNumber,method_name))
-
-canEtaCorr2 = TCanvas()
 QrelWrtMindistance.Draw("colz")
-QrelWrtMindistance.GetXaxis().SetTitle("minimal distance (mm)")
-QrelWrtMindistance.GetYaxis().SetTitle("relative charge")
+QrelWrtMindistance.SetTitle("Relative charge as a function of the track distance to the pixel edge")
+QrelWrtMindistance.GetXaxis().SetTitle("Track-pixel edge distance (mm)")
+QrelWrtMindistance.GetYaxis().SetTitle("Relative charge")
 h1_style(QrelWrtMindistance)
-canEtaCorr2.SaveAs("%s/Run%i/%s/Eta_hist.pdf"%(PlotPath,RunNumber,method_name))
+canEtaCorr.SaveAs("%s/Run%i/%s/Eta_hist.pdf"%(PlotPath,RunNumber,method_name))
 
 
 resX_cs = []
@@ -1048,7 +1035,7 @@ can_resY_cs_1.SaveAs("%s/Run%i/%s/resY_cs_1_fit.pdf"%(PlotPath,RunNumber,method_
 
 
 # Write all histograms to output root file
-out = TFile("%s/Run%i/%s/output_rootfile_distance%i.root"%(PlotPath,RunNumber,method_name,distance), "recreate")
+out = TFile("%s/Run%i/%s/output_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
 
 h_chi2.Write()
@@ -1070,7 +1057,6 @@ hClusterSizeCounter.Write()
 hClusterSizeCounter_percent.Write()
 hx.Write()
 hy.Write()
-graph1.Write()
 QrelWrtMindistance.Write()
 resX_s2x2y2.Write()
 resY_s2x2y2.Write()
