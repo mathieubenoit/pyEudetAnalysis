@@ -633,10 +633,9 @@ class EudetData:
     #----------------------------------------------------------------- cluster=0
 
     def FindMatchedCluster(self,i,r_max,dut=6,distances_histo=None,filter_cluster=True,TrackingRes=0.003) :
-
-        # i: event number
-        # r_max: maximum radial distance allowed between track and matched cluster
-        # dut: iden of the Device Under Test
+        # find the clusters closest to the tracks in this event
+        # clusters are matched to tracks using GetPixelResiduals
+        # r_max: maximum radial distance allowed between track and any pixel of the cluster
 
         clusters_tmp = self.AllClusters[i]
         matched_clusters = []
@@ -648,15 +647,16 @@ class EudetData:
                 distances = []
 
                 for cluster in clusters_tmp :
-                    cluster.GetResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
-                    distances.append(sqrt(cluster.resX**2 + cluster.resY**2))
+                    mdr, mdx, mdy = cluster.GetPixelResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
+                    distances.append(mdr)
+
                     if distances_histo:
-                        distances_histo.Fill(sqrt(cluster.resX**2 + cluster.resY**2))
+                        distances_histo.Fill(mdr)
 
                 cluster = clusters_tmp[distances.index(min(distances))]
 
                 if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if ((cluster.resX**2 + cluster.resY**2) < r_max**2) :
+                    if (min(distances) < r_max) :
                         # matched cluster
                         cluster.id = good_count
                         track.cluster = cluster.id
@@ -786,44 +786,38 @@ class EudetData:
 
         self.getEvent(i)
 
-        clusterid=0
-
         row_tmp = [s for s in self.p_row]
         col_tmp = [s for s in self.p_col]
         tot_tmp = [s for s in self.p_tot]
 
-
-#       for index in self.p_row:
-#            row_tmp.append(index)
-#        for index in self.p_col:
-#            col_tmp.append(index)
-#        for index in self.p_tot:
-#            tot_tmp.append(index)
-
-        hpindex=0
-
+        # remove hot pixels
+        hpindex = 0
         if len(self.hotpixels)>0:
             while(hpindex<len(row_tmp)) :
                 if([col_tmp[hpindex],row_tmp[hpindex]] in self.hotpixels):
-                        #print "Removing hot pixel x: %i y:%i"%(col_tmp[hpindex],row_tmp[hpindex])
                     col_tmp.pop(hpindex)
                     row_tmp.pop(hpindex)
                     tot_tmp.pop(hpindex)
                 else :
                     hpindex+=1
 
-
-
-        try :
-            clusters = self.SciPyClustering(col_tmp,row_tmp,tot_tmp)
-        except :
+        # set a maximum number of hit pixels to be clustered (skips large events)
+        if len(col_tmp) < 5000:
+            try : 
+                clusters = self.SciPyClustering(col_tmp,row_tmp,tot_tmp)
+            except : 
+                clusters=[]
+        else:
+            print "Event", i, "not beng clustered,", len(col_tmp), "hit pixels"
             clusters=[]
-	    
+
+
         for cluster in clusters :
             cluster.Statistics()	
 	
         clusters = [cluster for cluster in clusters if cluster.totalTOT>0]
 
+        clusterid = 0
 
         for cluster in clusters :
             if (method=="QWeighted"):
@@ -833,10 +827,7 @@ class EudetData:
             elif (method=="maxTOT"):
                 cluster.GetMaxTOTCentroid()
             elif (method=="EtaCorrection"):
-#                 cluster.GetEtaCorrectedQWeightedCentroid()
-                cluster.GetEtaCorrectedQWeightedCentroid(sigma)
-            # to be implemented in the future:
-            # digital, maxTOT/maxQ, eta corrected
+                cluster.GetEtaCorrectedQWeightedCentroid(sigma,sigma)
 
             cluster.id=clusterid
             clusterid+=1
@@ -847,40 +838,6 @@ class EudetData:
             self.AllClusters.append(clusters)
         del clusters
 
-
-        #while(len(row_tmp)!=0) :
-
-            #cluster = Cluster()
-            #cluster.addPixel(col_tmp[0], row_tmp[0], tot_tmp[0])
-            ##print "[DEBUG] adding pixel col=%d row=%d as seed"%(col_tmp[0],row_tmp[0])
-            #row_tmp.pop(0)
-            #col_tmp.pop(0)
-            #tot_tmp.pop(0)
-            #while(self.addNeighbor(cluster, col_tmp, row_tmp, tot_tmp)>0):
-                #pass
-
-
-            #cluster.Statistics()
-            #if (method=="QWeighted"):
-                #cluster.GetQWeightedCentroid()
-            #elif (method=="DigitalCentroid"):
-                #cluster.GetDigitalCentroid()
-            #elif (method=="maxTOT"):
-                #cluster.GetMaxTOTCentroid()
-            #elif (method=="EtaCorrection"):
-##                 cluster.GetEtaCorrectedQWeightedCentroid()
-                #cluster.GetEtaCorrectedQWeightedCentroid(sigma)
-            ## to be implemented in the future:
-            ## digital, maxTOT/maxQ, eta corrected
-
-            #cluster.id=clusterid
-            #clusters.append(cluster)
-            #clusterid+=1
-            #cluster=0
-
-        #for ind in range(i,i+scaler):
-            #self.AllClusters.append(clusters)
-        #del clusters
 
 
     def SciPyClustering(self,col,row,tot):

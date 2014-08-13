@@ -359,3 +359,22 @@ class Cluster:
     def GetResiduals(self,x,y) :
         self.resX = self.absX-(x)
         self.resY = self.absY-(y)
+
+
+    def GetPixelResiduals(self,trackx,tracky) :
+        # compute the x, y distances between a track 
+        # and the centre of each pixel in the cluster
+        # return the smallest combined
+
+        dr = []
+        dx = []
+        dy = []
+        for i in xrange(self.size):
+            resX = self.col[i]*pitchX + pitchX/2. - halfChip_X - trackx
+            resY = self.row[i]*pitchY + pitchY/2. - halfChip_Y - tracky
+
+            dr.append(sqrt(resX**2 + resY**2))
+            dx.append(resX)
+            dy.append(resY)
+
+        return min(dr), dx[dr.index(min(dr))], dy[dr.index(min(dr))]
