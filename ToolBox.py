@@ -538,25 +538,6 @@ def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
     return histox,histoy
 
 
-def TrackClusterCorrelation_Test(dataSet,dut=6):
-
-    histox_Test = TH2D("corX","corX",(npix_X),-14.,14.,(npix_X),-14.,14.)
-    histoy_Test = TH2D("corY","corY",(npix_Y),-14.,14.,(npix_Y),-14.,14.)
-    hl_Test = [histox_Test,histoy_Test]
-
-    for h in hl_Test :
-        h.GetXaxis().SetTitle("Cluster Position (mm)")
-        h.GetYaxis().SetTitle("Track position (mm)")
-
-    for i in range(dataSet.p_nEntries) :
-#         print "i: %i"%i
-#     for i in range(10000) :
-        for track in dataSet.AllTracks[i] :
-            for index,cluster in enumerate(dataSet.AllClusters[i]) :
-                histox_Test.Fill(cluster.absX,track.trackX[track.iden.index(dut)])
-                histoy_Test.Fill(cluster.absY,track.trackY[track.iden.index(dut)])
-    return histox_Test,histoy_Test
-
 
 def TotalMeanFunctionX(Translations,Rotations,aDataDet,nevents,skip,cut = 0.1,dut=6):
 
@@ -871,39 +852,38 @@ def ReadAlignment(filename) :
 
 
 def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,Rotations=[0,0,0]):
+    # will plot the x and y distance between every cluster-track pair in an event
+    # returns the central values of the x, y bins with the most entries, and hists
 
     last_time=time.time()
-    totaldist_evaluator = 0.
-    n = 0
-
-    h_dist_x_2 = TH1D("h_dist_x_2","TotalMeanFunctionY: dist_x",800,-20.,20.)
-    h_dist_y_2 = TH1D("h_dist_y_2","TotalMeanFunctionY: dist_y",800,-20.,20.)
-
-    for i,clusters in enumerate(aDataSet.AllClusters[0:nevents]) :
-        for index,cluster in enumerate(clusters) :
-            if i%skip==0 :
-                for track in aDataSet.AllTracks[i] :
+    h_dist_x = TH1D("h_dist_x","Track-cluster distance x",800,-20.,20.)
+    h_dist_y = TH1D("h_dist_y","Track-cluster distance y",800,-20.,20.)
                     
+    for i in xrange(nevents):
+        if i%skip == 0:
+            clusters = aDataSet.AllClusters[i]
+            for cluster in clusters:
+                for track in aDataSet.AllTracks[i]:
+
                     tmp=[track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)],0]
                     tmp=np.dot(RotationMatrix(Rotations),tmp)
             
                     distx=cluster.absX -tmp[0]
                     disty=cluster.absY -tmp[1]
 
-                    h_dist_x_2.Fill(distx)
-                    h_dist_y_2.Fill(disty)
+                    h_dist_x.Fill(distx)
+                    h_dist_y.Fill(disty)
 
+        if i%1000 == 0 :
+            print "Event %d"%i
+            print "Elapsed time/1000 Event. Prealignment : %f s"%(time.time()-last_time)
+            last_time = time.time()
 
-    can = TCanvas()
-    h_dist_x_2.Draw("")
-    h_dist_y_2.Draw("same")
-    maxx_bin = h_dist_x_2.GetMaximumBin()
-    maxx = h_dist_x_2.GetXaxis().GetBinCenter(maxx_bin)
-    maxy_bin = h_dist_y_2.GetMaximumBin()
-    maxy = h_dist_y_2.GetXaxis().GetBinCenter(maxy_bin)
+    maxx_bin = h_dist_x.GetMaximumBin()
+    maxx = h_dist_x.GetXaxis().GetBinCenter(maxx_bin)
+    maxy_bin = h_dist_y.GetMaximumBin()
+    maxy = h_dist_y.GetXaxis().GetBinCenter(maxy_bin)
     
-    
-
     f = open(filename,'w')
     f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(0,0,0,maxx,maxy))
     f.close()
@@ -911,7 +891,7 @@ def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,
     print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,0,0,0)
     print "Time for Prealignement : %f s"%(time.time()-last_time)
 
-    return [[0,0,0,maxx,maxy]]
+    return [[0,0,0,maxx,maxy]], h_dist_x, h_dist_y
 
 
 
@@ -938,39 +918,34 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
   
     rZ = theRs[sigmas.index(min(sigmas))]
     
-    print "Optimal Z angle : %f"%rZ
-    
-#    sigmas = []
-#    for rY in theRs:
-#        aSigma=TotalRotationFunction([0,rY,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
-#        if isnan(aSigma) : 
-#            sigmas.append(1e7)
-#        else : 
-#            sigmas.append(aSigma)        
-#    rY = theRs[sigmas.index(min(sigmas))]
-#    print "Optimal Y angle : %f"%rY
-#      
-#    sigmas = []
-#    for rX in theRs:
-#        aSigma=TotalRotationFunction([rX,rY,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
-#        if isnan(aSigma) : 
-#            sigmas.append(1e7)
-#        else : 
-#            sigmas.append(aSigma)
-#            
-#    rX = theRs[sigmas.index(min(sigmas))]
-#    print "Optimal Z angle : %f"%rX
-#    
-#    print "rX: %f rY:%f rZ:%f"%(rX,rY,rZ) 
-       
+    print "Starting guess Z angle : %f"%rZ
+      
     xr= np.array([0,0,rZ])
     
     argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut        
     resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': 0.000001 , 'eps':0.5, 'maxiter' : 15 })
+    print "resr", resr
+    print "best guess for rotation matrix: resr.x", resr.x
+    if resr.success == False:
+        print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
+        b=raw_input()
+
+
     argTuple = resr.x,aDataSet,nevent,skip,cut  
     rest = minimize(TotalMeanFunctionX,x_tx, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
+    print "rest", rest
+    print "best guess for x translation: rest.x", rest.x
+    if rest.success == False:
+        print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
+        b=raw_input() 
+
     argTuple = rest.x[0],resr.x,aDataSet,nevent,skip,cut
     rest2= minimize(TotalMeanFunctionY,x_ty, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
+    print "rest2", rest2
+    print "best guess for y translation: rest2.x", rest2.x
+    if rest2.success == False:
+        print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
+        b=raw_input() 
 
     f = open(filename,'a')
     f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(resr.x[0],resr.x[1],resr.x[2],rest.x[0],rest2.x[0]))
