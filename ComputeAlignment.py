@@ -1,3 +1,8 @@
+# Will process a tbtrack file
+# Will produce an alignment file
+# For options, run:
+# python ComputeAlignment.py -h
+
 from math import fsum
 import time,os
 from optparse import OptionParser
@@ -38,7 +43,6 @@ if(options.EDGE) :
 else : 
     edge_width = 0.0
     
-
 if(options.METHOD) :
     if(options.METHOD=="QWeighted"):
         method_name=options.METHOD
@@ -57,12 +61,6 @@ else:
     print "Please provide a valid cluster position reconstruction method ( -m [method]  QWeighted,maxTOT,DigitalControid,EtaCorrection)"
     parser.print_help()
     exit()
-
-# method_name = "QWeighted"
-# method_name = "DigitalCentroid"
-# method_name = "maxTOT"
-#method_name = "EtaCorrection"
-
 
 if(options.INPUT):
     input_folder=options.INPUT
@@ -85,56 +83,8 @@ else :
     parser.print_help()
     exit()
 
-#
-###############################################################################################################################
-# first compile the code in ROOT us
-#ing ACLIC: (testLangauFit.C)
-# .L File.C+
-
-#from guppy import hpy
-#h = hpy()
-#gSystem.Load('testLangauFit_C.so')
-# gSystem.Load('/afs/cern.ch/work/a/apequegn/public/DESY_TB_DATA_02_07-06-2013_results/pyEudetAnalysisPlots/testLangauFit_C.so')
-
-# Now the function should be available in the ROOT namespace
-#from ROOT import langaufun, langaufit, langaupro
-
-###############################################################################################################################
-
-#PlotPath = "/VertexScratch/TB_Data/DESY_TB_DATA_August2013_results/pyEudetAnalysis_plots"
-
-# global n_sizeX2sizeY2
-
-
-def h1_style(h, optstat=0) :
-    h.SetStats(optstat)
-    h.SetLabelFont(42,"X")
-    h.SetLabelFont(42,"Y")
-    h.SetLabelOffset(0.005,"X")
-    h.SetLabelOffset(0.005,"Y")
-    h.SetLabelSize(0.045,"X")
-    h.SetLabelSize(0.045,"Y")
-    h.SetTitleOffset(1.15,"X")
-    h.SetTitleOffset(1.15,"Y")
-    h.SetTitleSize(0.04,"X")
-    h.SetTitleSize(0.04,"Y")
-    #h.SetTitle(0)
-    h.SetTitleFont(42, "XYZ")
-
-def TGraph_style (h) :
-    h.GetXaxis().SetLabelOffset(0.005)
-    h.GetXaxis().SetLabelFont(42)
-    h.GetXaxis().SetLabelSize(0.055)
-    h.GetXaxis().SetTitleOffset(1.15)
-    h.GetXaxis().SetTitleSize(0.04)
-    h.GetXaxis().SetTitleFont(42)
-#     h.GetYaxis().SetRangeUser(0.,1.)
-    h.GetYaxis().SetLabelOffset(0.005)
-    h.GetYaxis().SetLabelFont(42)
-    h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.2)
-    h.GetYaxis().SetTitleFont(42)
-    h.GetYaxis().SetTitleSize(0.04)
+os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
+os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
 
 from ROOT import *
 import ROOT
@@ -150,31 +100,10 @@ gStyle.SetOptStat("nemruoi")
 gStyle.SetOptFit(1111)
 
 
-
-
-#aDataSet = EudetData("/VertexScratch/TB_Data/DESY_TB_DATA_02_07-06-2013_results/histo/tbtrackrun000062.root",500.0)
-#aDataSet = EudetData("%s/Run%i_pyEudetNtuple.root"%(input_folder,RunNumber),50000.0,edge_width,1,RunNumber,"tbtrack")
-#aDataSet.ReadReconstructedData()
-
-
 aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,RunNumber,"tbtrack")
-
-#h_chi2,h_chi2ndof = aDataSet.GetChi2Cut(0.95)
-
-#can_chi2 = TCanvas()
-#h_chi2.Draw("")
-#can_chi2.SetLogx()
-#can_chi2.SetLogy()
-#
-#can_chi2ndof = TCanvas()
-#h_chi2ndof.Draw("")
-#can_chi2ndof.SetLogx()
-#can_chi2ndof.SetLogy()
 
 
 scaler = 1
-#n_proc= 25000
-
 
 histo_hot,histo_freq = aDataSet.FilterHotPixel(0.01,5000,15)
 
@@ -187,48 +116,15 @@ canfreq.SetLogy()
 histo_freq.Draw("")
 
 
-
-
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
 else :
     n_proc= aDataSet.t_nEntries
 
 print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
-# aDataSet.PrintTBranchElement()
 
-trackX_vs_trackY_plan3 = TH2D("trackX_vs_trackY_plan3","track_posX[3] wrt track_posY[3]",300,-20.,20.,300,-20.,20.)
-# trackX_vs_trackY_plan3.GetXaxis().SetRangeUser(-0.,14.08)
-trackX_vs_trackY_plan3.GetXaxis().SetTitle("Track X position within pixel [mm]")
-# trackX_vs_trackY_plan3.GetYaxis().SetRangeUser(-0.,14.08)
-trackX_vs_trackY_plan3.GetYaxis().SetTitle("Track Y position within pixel [mm]")
-
-trackX_vs_trackY_plan0 = TH2D("trackX_vs_trackY_plan0","track_posX[0] wrt track_posY[0]",300,-20.,20.,300,-20.,20.)
-# trackX_vs_trackY_plan0.GetXaxis().SetRangeUser(-0.,14.08)
-trackX_vs_trackY_plan0.GetXaxis().SetTitle("Track X position within pixel [mm]")
-# trackX_vs_trackY_plan0.GetYaxis().SetRangeUser(-0.,14.08)
-trackX_vs_trackY_plan0.GetYaxis().SetTitle("Track Y position within pixel [mm]")
-
-h1_style(trackX_vs_trackY_plan3)
-h1_style(trackX_vs_trackY_plan0)
-
-# Filter Hot Pixels
-# histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,25000)
-#histo_hot,histo_freq = aDataSet.FilterHotPixel(0.1,5000,10)
-#
-#canhot = TCanvas()
-#histo_hot.Draw("colz")
-#
-#canfreq = TCanvas()
-#canfreq.SetLogx()
-#canfreq.SetLogy()
-#histo_freq.Draw("")
-
-n_matched = 0
-#for i in range(aDataSet.p_nEntries) :
 
 last_time=time.time()
-
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
@@ -237,67 +133,54 @@ for i in range(0,n_proc) :
     if i%1000 ==0 :
         print "Event %d"%i
         print "Elapsed time/1000 Event. Clustering : %f s"%(time.time()-last_time)
-        #print h.heap()
         last_time = time.time()
-
-
-#Rot = [0,0,0]
-#Trans=[0,0,0]
-#for i in range(0,n_proc-1) :
-#    ApplyAlignment_at_event(i,aDataSet,Trans,Rot)
-
 
 last_time=time.time()
 
-hx,hy = TrackClusterCorrelation(aDataSet,6,50000)
+tccorx1,tccory1 = TrackClusterCorrelation(aDataSet,6,n_proc)
+tccorx1.SetName("tccor1")
+tccory1.SetName("tccory1")
+cantccorx1 = TCanvas()
+tccorx1.Draw("colz")
+cantccory1 = TCanvas()
+tccory1.Draw("colz")
 
-cancorx = TCanvas()
-hx.Draw("colz")
+print "Press any key to continue, ctrl-D to stop"
+bla = raw_input()
 
-cancory = TCanvas()
-hy.Draw("colz")
 
-#bla = raw_input()
+print "Performing prealignment"
+alignment_constants, prealix, prealiy = PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,0])
+canprealix = TCanvas()
+prealix.Draw()
+canprealiy = TCanvas()
+prealiy.Draw()
 
-alignment_constants=PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,0])
+print "Press any key to continue, ctrl-D to stop"
+b=raw_input() 
 
-for i in range(0,n_proc-1) :
-#    aDataSet.getEvent(i)
-#    aDataSet.ClusterEvent(i,method_name,0.003,scaler)
-#    #print "Event %i"%i
-#    for ind in range(i,i+scaler):
-#    #print "copying to event %i"%ind
-#        aDataSet.GetTrack(ind)
-#        trackX_vs_trackY_plan3.Fill(aDataSet.t_posX[3],aDataSet.t_posY[3])
-#        trackX_vs_trackY_plan0.Fill(aDataSet.t_posX[0],aDataSet.t_posY[0])
+last_time = time.time()
+
+for i in range(0,n_proc) :
 
     for alignement in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
 
-        #ApplyAlignment_at_event(ind,aDataSet,[0.97, 0, 0.],[0.0000000000, 0.0000000000,0.0])
-
-    aDataSet.FindMatchedCluster(i,0.3 ,6,True)
+    aDataSet.FindMatchedCluster(i,0.3,6)
     a,b=aDataSet.ComputeResiduals(i)
-    n_matched+=a
     if i%1000 ==0 :
         print "Event %d"%i
         print "Elapsed time/1000 Event. Apply Alignement and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
-            #print h.heap()
-#bleh=PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,0])
 
 
-hx,hy = TrackClusterCorrelation(aDataSet,6,50000)
-
-cancorx = TCanvas()
-hx.Draw("colz")
-
-cancory = TCanvas()
-hy.Draw("colz")
-
-#bla = raw_input()
-
-
+tccorx2,tccory2 = TrackClusterCorrelation(aDataSet,6,n_proc)
+tccorx2.SetName("tccorx2")
+tccory2.SetName("tccory2")
+cancorx2 = TCanvas()
+tccorx2.Draw("colz")
+cancory2 = TCanvas()
+tccory2.Draw("colz")
 
 
 niter = 2
@@ -306,38 +189,20 @@ for i in range(niter) :
     ApplyAlignment(aDataSet,rest,resr)
 
 
-hx,hy = TrackClusterCorrelation(aDataSet,6,50000)
-
-cancorx = TCanvas()
-hx.Draw("colz")
-
-cancory = TCanvas()
-hy.Draw("colz")
-
-#bla = raw_input()
-
-
-
+tccorx3,tccory3 = TrackClusterCorrelation(aDataSet,6,n_proc)
+tccorx3.SetName("tccorx3")
+tccory3.SetName("tccory3")
+cancorx3 = TCanvas()
+tccorx3.Draw("colz")
+cancory3 = TCanvas()
+tccory3.Draw("colz")
 
 
 n_matched = 0
 
-for i in range(0,n_proc-1) :
-#    aDataSet.getEvent(i)
-#    aDataSet.ClusterEvent(i,method_name,0.003,scaler)
-#    #print "Event %i"%i
-#    for ind in range(i,i+scaler):
-#    #print "copying to event %i"%ind
-#        aDataSet.GetTrack(ind)
-#        trackX_vs_trackY_plan3.Fill(aDataSet.t_posX[3],aDataSet.t_posY[3])
-#        trackX_vs_trackY_plan0.Fill(aDataSet.t_posX[0],aDataSet.t_posY[0])
+for i in range(0,n_proc) :
 
-#    for alignement in alignment_constants :
-#        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
-
-        #ApplyAlignment_at_event(ind,aDataSet,[0.97, 0, 0.],[0.0000000000, 0.0000000000,0.0])
-
-    aDataSet.FindMatchedCluster(i,0.3 ,6,True)
+    aDataSet.FindMatchedCluster(i,0.3,6)
     a,b=aDataSet.ComputeResiduals(i)
     n_matched+=a
     if i%1000 ==0 :
@@ -345,8 +210,20 @@ for i in range(0,n_proc-1) :
         print "Elapsed time/1000 Event. Apply Alignement and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
+      
+# Write all histograms to output root file
+out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
+out.cd()
+histo_hot.Write()
+histo_freq.Write()
+tccorx1.Write()
+tccory1.Write()
+tccorx2.Write()
+tccory2.Write()
+tccorx3.Write()
+tccory3.Write()
+prealix.Write()
+prealiy.Write()
 
-#bleh=PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,0])      
-        
 print "Found %i matched track-cluster binome"%n_matched
 print "Produced Alignment file %s"%AlignementPath
