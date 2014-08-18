@@ -147,8 +147,16 @@ histo_maprepeats.Draw()
 histo_maprepeats.SaveAs("%s/Run%i/PixelMapRepeats_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
 
-# Filter Hot Pixels
-histo_hot,histo_freq = aDataSet.FilterHotPixel(0.01,n_proc,15)
+# Find Hot Pixels
+histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
+
+cannhits = TCanvas()
+histo_nhits.Draw()
+cannhits.SaveAs("%s/Run%i/NHit_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+
+canhit = TCanvas()
+histo_hit.Draw("colz")
+canhit.SaveAs("%s/Run%i/Hit_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
 canhot = TCanvas()
 histo_hot.Draw("colz")

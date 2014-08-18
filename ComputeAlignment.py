@@ -105,7 +105,14 @@ aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,e
 
 scaler = 1
 
-histo_hot,histo_freq = aDataSet.FilterHotPixel(0.01,5000,15)
+if(options.NEVENT):
+    n_proc= int(options.NEVENT)
+else :
+    n_proc= aDataSet.t_nEntries
+
+print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
+
+histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
 
 canhot = TCanvas()
 histo_hot.Draw("colz")
@@ -115,13 +122,6 @@ canfreq.SetLogx()
 canfreq.SetLogy()
 histo_freq.Draw("")
 
-
-if(options.NEVENT):
-    n_proc= int(options.NEVENT)
-else :
-    n_proc= aDataSet.t_nEntries
-
-print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
 
 
 last_time=time.time()

@@ -201,9 +201,8 @@ trackX_vs_trackY_plan0.GetYaxis().SetTitle("Track Y position within pixel [mm]")
 h1_style(trackX_vs_trackY_plan3)
 h1_style(trackX_vs_trackY_plan0)
 
-# Filter Hot Pixels
-# histo_hot,histo_freq = aDataSet.FilterHotPixel(0.005,25000)
-histo_hot,histo_freq = aDataSet.FilterHotPixel(0.999,500,10)
+# Find Hot Pixels
+histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.999,500)
 
 canhot = TCanvas()
 histo_hot.Draw("colz")
