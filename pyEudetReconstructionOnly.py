@@ -99,7 +99,6 @@ import pyximport; pyximport.install(pyimport=True)
 from EudetData import *
 from array import array
 
-
 alignment_constants = ReadAlignment(AlignementPath)
 
 
@@ -139,6 +138,13 @@ else :
     n_proc= aDataSet.t_nEntries
 
 print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
+
+
+# Count pixel map repeats
+histo_maprepeats = CountPixelMapRepeats(aDataSet,n_proc)
+canreps = TCanvas()
+histo_maprepeats.Draw()
+histo_maprepeats.SaveAs("%s/Run%i/PixelMapRepeats_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
 
 # Filter Hot Pixels

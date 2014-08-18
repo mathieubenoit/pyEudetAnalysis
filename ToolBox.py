@@ -1185,6 +1185,37 @@ def ApplyPixelEnergyCalibration(aDataSet,nevents,calibFile):
                 cluster.tot[k] = ( t[col][row]*a[col][row] + tot - b[col][row] + sqrt( ( b[col][row] + t[col][row]*a[col][row] - tot )**2 + 4*a[col][row]*c[col][row] ) ) / (2*a[col][row]) # energy in keV
 
 
+def CountPixelMapRepeats(dataSet,n_proc):
+    # counts the number of times a pixel map is repeated
+    # returns a histogram of result
+
+    histo_mapreps = TH1F("histo_mapreps","",20,0.5,20.5)
+    histo_mapreps.GetXaxis().SetTitle("Number of repeated pixel maps")
+    prev_pixel_xhits = []
+    nrepeats = 1
+
+    print n_proc
+    for i in range(0,n_proc) :
+        dataSet.getEvent(i)
+
+        npixels_hit = len(dataSet.p_col)
+        pixel_x_hits = []
+        for k in xrange(npixels_hit):
+            pixel_x_hits.append(dataSet.p_col[k])
+
+        if (pixel_x_hits == prev_pixel_xhits):
+            # same pixel map as before
+            nrepeats = nrepeats+1
+        else:
+            # new pixel map
+            if i != 0:
+                histo_mapreps.Fill(nrepeats)
+            nrepeats = 1
+
+        prev_pixel_xhits = pixel_x_hits
+
+    return histo_mapreps
+
 
 ###############################################################################################################################
 #
