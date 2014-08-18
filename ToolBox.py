@@ -1194,7 +1194,6 @@ def CountPixelMapRepeats(dataSet,n_proc):
     prev_pixel_xhits = []
     nrepeats = 1
 
-    print n_proc
     for i in range(0,n_proc) :
         dataSet.getEvent(i)
 
