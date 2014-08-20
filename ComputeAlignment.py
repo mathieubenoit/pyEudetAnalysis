@@ -243,7 +243,7 @@ for i in range(0,n_proc) :
 out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
 histo_nhits.Write()
-histo_hits.Write()
+histo_hit.Write()
 histo_hot.Write()
 histo_freq.Write()
 tccorx1.Write()
