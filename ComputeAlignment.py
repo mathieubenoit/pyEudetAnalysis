@@ -107,12 +107,24 @@ scaler = 1
 
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
+
+    if n_proc >= aDataSet.t_nEntries:
+        n_proc = -1
+    if n_proc == -1:
+        n_proc = aDataSet.t_nEntries
+
 else :
     n_proc= aDataSet.t_nEntries
 
 print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
 
 histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
+
+cannhits = TCanvas()
+histo_nhits.Draw()
+
+canhit = TCanvas()
+histo_hit.Draw("colz")
 
 canhot = TCanvas()
 histo_hot.Draw("colz")
@@ -123,12 +135,28 @@ canfreq.SetLogy()
 histo_freq.Draw("")
 
 
-
+prev_pixel_xhits = []
 last_time=time.time()
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
-    aDataSet.ClusterEvent(i,method_name,0.003,scaler)
+
+    # is this a new pixel map?
+    npixels_hit = len(aDataSet.p_col)
+    pixel_x_hits = []
+    for k in xrange(npixels_hit):
+        pixel_x_hits.append(aDataSet.p_col[k])
+
+    if (pixel_x_hits == prev_pixel_xhits):
+        # print "same pixel map as before, will add clusters already computed"
+        aDataSet.AllClusters.append(clusters_tmp)
+    else:
+        # print "this is a new event, will cluster"
+        etacorr_sigma = 0.003
+        aDataSet.ClusterEvent(i, method_name, etacorr_sigma, scaler)
+        clusters_tmp = aDataSet.AllClusters[i]
+    prev_pixel_xhits = pixel_x_hits
+
     aDataSet.GetTrack(i)
     if i%1000 ==0 :
         print "Event %d"%i
@@ -214,6 +242,8 @@ for i in range(0,n_proc) :
 # Write all histograms to output root file
 out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
+histo_nhits.Write()
+histo_hits.Write()
 histo_hot.Write()
 histo_freq.Write()
 tccorx1.Write()
