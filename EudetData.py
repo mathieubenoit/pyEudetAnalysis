@@ -158,75 +158,81 @@ class EudetData:
 
 
 
-    def FilterHotPixel(self,threshold,Nevents=-1,scaler=1.):
+    def FindHotPixel(self,threshold,Nevents=-1):
 
-        # Threshold between [0,1], cut firing frequency of pixels
-        # Nevent is how many event for building the frequency Matrix
+        # will calculate the frequency with which each pixel fires
+        # threshold (0 -> 1) defines hot pixel cut
 
-        nevent_tmp =0
         n_max = 0
+        prev_pixel_xhits = []
+        unique_events = 0
 
-#        last =0
-#        now =0
-
-#        counter_tmp=0
-
-        histo_frequency = TH1D("freq","Firing Frequency",10000,0,1)
-        histo_hotpixel = TH2D("hot","hot pixel map",256,0,255,256,0,255)
+        histo_nhits = TH1D("nhit","N Pixel Fires",40,0,39)
+        histo_hitpixel = TH2D("hit","Hit Pixel Map",256,0,255,256,0,255)
+        histo_frequency = TH1D("freq","Pixel Firing Frequency",10000,0,1)
+        histo_hotpixel = TH2D("hot","Hot Pixel Map",256,0,255,256,0,255)
 
         if Nevents>self.p_nEntries or Nevents==-1:
             n_max = self.p_nEntries
-        elif Nevents < 10000:
-            print "FilterHotPixel over-riding requested nevents"
-            print "FilterHotPixel must be run on atleast 10000 events (for a threshold of 0.01) to be accurate"
+        elif Nevents < 10000 and self.p_nEntries >= 10000:
+            print "FindHotPixel over-riding requested nevents"
+            print "FindHotPixel must be run on atleast 10000 events (for a threshold of 0.01) to be accurate"
+            print "FindHotPixel will use 10000 events"
             n_max = 10000
+        elif Nevents < 10000 and self.p_nEntries < 10000:
+            print "FindHotPixel over-riding requested nevents"
+            print "FindHotPixel must be run on atleast 10000 events (for a threshold of 0.01) to be accurate"
+            print "FindHotPixel will use as many events as exist in this run"
+            n_max = self.p_nEntries
         else :
             n_max = Nevents
 
+        # loop through events to find unique events
+        # for each fired pixel in each event, increment hit map
+        for i in range(n_max) :
+            self.getEvent(i)
+            if i%10000 == 0 :
+                print " [Hot Pixel Finder] Parsing event %i" %i
 
-        for ii in range(n_max) :
-            self.getEvent(ii)
-            if ii%1000==0 :
-                print " [Hot Pixel Finder] Parsing event %i"%ii
-            for jj in range(len(self.p_row)) :
+            # is this a new frame, or the next event in the same frame?
+            npixels_hit = len(self.p_col)
+            pixel_x_hits = []
+            for k in xrange(npixels_hit):
+                pixel_x_hits.append(self.p_col[k])
 
-#                last = self.hit_map[129][20]
+            if (pixel_x_hits == prev_pixel_xhits):
+                # another track in the same event
+                continue
+            else:
+                # this is a new event
+                unique_events = unique_events + 1
 
-                self.hit_map[self.p_col[jj]][self.p_row[jj]]+=1./scaler
+            prev_pixel_xhits = pixel_x_hits
 
-#                now = self.hit_map[129][20]
+            for j in range(len(self.p_row)) :
+                self.hit_map[self.p_col[j]][self.p_row[j]] += 1
+                histo_hitpixel.Fill(self.p_col[j],self.p_row[j])
 
-#                if last != now :
-#                    counter_tmp+=1
-#                    print "adding %i %i , counter = %i %i"%(self.p_col[jj],self.p_row[jj],counter_tmp,self.hit_map[self.p_col[jj]][self.p_row[jj]])
+        # loop through hitmap
+        # fill freq map with hits / nevents
+        print "Ran over", n_max, "events, found", unique_events, "unique pixel maps"
+        for i in range(npix_X):
+            for j in range(npix_Y) :
 
-            nevent_tmp += 1./scaler
+                self.frequency_map[i][j]=self.hit_map[i][j]*(1.0/float(unique_events))
+                histo_nhits.Fill(self.hit_map[i][j])
+                histo_frequency.Fill(self.frequency_map[i][j])
 
-
-
-        for ii in range(npix_X):
-            for jj in range(npix_Y) :
-
-#                if ii==129 and jj==20 :
-#                    print "[DEDUG !!!!!!!!!] %f nevents : %i"%(self.hit_map[ii][jj],nevent_tmp)
-                self.frequency_map[ii][jj]=self.hit_map[ii][jj]*(1.0/float(nevent_tmp))
-#                if ii==129 and jj==20 :
-#                    print "[DEDUG !!!!!!!!!] %f nevents : %i"%(self.frequency_map[ii][jj],nevent_tmp)
-                histo_hotpixel.Fill(ii,jj,self.frequency_map[ii][jj])
-
-                #if(self.frequency_map[ii][jj]>1):
-                    #print ii,jj,self.frequency_map[ii][jj]
-
-                histo_frequency.Fill(self.frequency_map[ii][jj])
-                if(self.frequency_map[ii][jj]>threshold):
-                    #print "hotpixel %i %i"%(ii,jj)
-                    self.hotpixels.append([ii,jj])
+                # if freq > threshold, make a hotpixel
+                if(self.frequency_map[i][j] > threshold):
+                    histo_hotpixel.Fill(i,j,self.frequency_map[i][j]) 
+                    self.hotpixels.append([i,j])
 
         print "##### Hot Pixel Report #####"
         print " %i Hot pixel found at  : "%(len(self.hotpixels))
         print self.hotpixels
         print "############################"
-        return histo_hotpixel,histo_frequency
+        return histo_nhits,histo_hitpixel,histo_hotpixel,histo_frequency
 
 
     def getEvent(self,i):
