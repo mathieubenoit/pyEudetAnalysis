@@ -885,13 +885,13 @@ def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,
     maxy = h_dist_y.GetXaxis().GetBinCenter(maxy_bin)
     
     f = open(filename,'w')
-    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(0,0,0,maxx,maxy))
+    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(Rotations[0],Rotations[1],Rotations[2],maxx,maxy))
     f.close()
 
-    print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,0,0,0)
+    print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,Rotations[0],Rotations[1],Rotations[2])
     print "Time for Prealignement : %f s"%(time.time()-last_time)
 
-    return [[0,0,0,maxx,maxy]], h_dist_x, h_dist_y
+    return [[Rotations[0],Rotations[1],Rotations[2],maxx,maxy]], h_dist_x, h_dist_y
 
 
 
