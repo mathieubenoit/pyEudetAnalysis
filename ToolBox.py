@@ -923,7 +923,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     xr= np.array([0,0,rZ])
     
     argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut        
-    resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': 0.000001 , 'eps':0.5, 'maxiter' : 15 })
+    resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': gtol , 'eps':0.5, 'maxiter' : 15 })
     print "resr", resr
     print "best guess for rotation matrix: resr.x", resr.x
     if resr.success == False:
