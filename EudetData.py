@@ -261,7 +261,7 @@ class EudetData:
         self.p_row= self.pixelTree.row
         self.p_tot= self.pixelTree.tot
         self.p_lv1= self.pixelTree.lv1
-        self.p_chip= self.pixelTree.chip
+        #self.p_chip= self.pixelTree.chip
         self.p_iden= self.pixelTree.iden
         self.p_euEv = self.pixelTree.euEvt
 
