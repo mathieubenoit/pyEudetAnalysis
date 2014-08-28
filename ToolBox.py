@@ -978,11 +978,40 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #param 2: number of events we are running on
 #param 3: number of skiped events
 #
-def FindSigmaMin(dataSet,nevent,skip) :
-    xsigmachargeX = np.array([0.005])
-    xsigmachargeY = np.array([0.005])
-    ressigmachargeX = minimize(TotalSigmaFunctionX,xsigmachargeX,[xsigmachargeY,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
-    ressigmachargeY = minimize(TotalSigmaFunctionY,xsigmachargeY,[ressigmachargeX.x,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
+def FindSigmaMin(dataSet,nevent,skip=1) :
+    
+    grX = TGraph(100)
+    grY = TGraph(100) 
+    
+    bestsigma=1000
+    bestres=1000    
+    for sigmaint in range(100) :
+    	sigma=sigmaint*1e-4
+	
+	
+	
+    	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip)
+    	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip)
+	res=resX/2.0+resY/2.0
+	grX.SetPoint(sigmaint,sigma,resX)
+	grY.SetPoint(sigmaint,sigma,resY)
+	
+	if (res < bestres) : 
+		bestres=res
+		bestsigma=sigma
+    grX.Draw("AL")
+    grY.Draw("same")
+    print "Best Sigma found at : %f um for resolution : %f um"%(bestsigma*1000,bestres*1000)
+    blah=raw_input()
+     
+    return bestres,bestres
+     
+     
+	    
+#    xsigmachargeX = np.array([0.005])
+#    xsigmachargeY = np.array([0.005])
+#    ressigmachargeX = minimize(TotalSigmaFunctionX,xsigmachargeX,[xsigmachargeY,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
+#    ressigmachargeY = minimize(TotalSigmaFunctionY,xsigmachargeY,[ressigmachargeX.x,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
 
     return ressigmachargeX.x ,ressigmachargeY.x
 
