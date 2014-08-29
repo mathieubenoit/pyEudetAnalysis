@@ -980,8 +980,8 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #
 def FindSigmaMin(dataSet,nevent,skip=1) :
     
-    grX = TGraph(100)
-    grY = TGraph(100) 
+    #grX = TGraph(100)
+    #grY = TGraph(100) 
     
     bestsigma=1000
     bestres=1000    
@@ -993,16 +993,16 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
     	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip)
     	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip)
 	res=resX/2.0+resY/2.0
-	grX.SetPoint(sigmaint,sigma,resX)
-	grY.SetPoint(sigmaint,sigma,resY)
+	#grX.SetPoint(sigmaint,sigma,resX)
+	#grY.SetPoint(sigmaint,sigma,resY)
 	
 	if (res < bestres) : 
 		bestres=res
 		bestsigma=sigma
-    grX.Draw("AL")
-    grY.Draw("same")
+    #grX.Draw("AL")
+    #grY.Draw("same")
     print "Best Sigma found at : %f um for resolution : %f um"%(bestsigma*1000,bestres*1000)
-    blah=raw_input()
+    #blah=raw_input()
      
     return bestres,bestres
      
