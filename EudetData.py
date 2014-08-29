@@ -261,7 +261,7 @@ class EudetData:
         self.p_row= self.pixelTree.row
         self.p_tot= self.pixelTree.tot
         self.p_lv1= self.pixelTree.lv1
-        self.p_chip= self.pixelTree.chip
+        #self.p_chip= self.pixelTree.chip
         self.p_iden= self.pixelTree.iden
         self.p_euEv = self.pixelTree.euEvt
 
@@ -458,12 +458,23 @@ class EudetData:
         for j,clusters in enumerate(self.AllClusters) :
             for cluster in clusters :
 
-                for i in range(len(cluster.col)) :
-                    col[i]=cluster.col[i]
-                for i in range(len(cluster.row)) :
-                    row[i]=cluster.row[i]
-                for i in range(len(cluster.tot)) :
-                    tot[i]=cluster.tot[i]
+                if(len(cluster.col)<maxn) :
+		
+	   	    for i in range(len(cluster.col)) :
+                        col[i]=cluster.col[i]
+                    for i in range(len(cluster.row)) :
+                        row[i]=cluster.row[i]
+                    for i in range(len(cluster.tot)) :
+                        tot[i]=cluster.tot[i]
+			
+		else : 
+	   	    for i in range(maxn) :
+                        col[i]=cluster.col[i]
+                    for i in range(maxn) :
+                        row[i]=cluster.row[i]
+                    for i in range(maxn) :
+                        tot[i]=cluster.tot[i]
+					
 
                 sizeX[0]=cluster.sizeX
                 sizeY[0]=cluster.sizeY

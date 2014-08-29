@@ -885,13 +885,13 @@ def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,
     maxy = h_dist_y.GetXaxis().GetBinCenter(maxy_bin)
     
     f = open(filename,'w')
-    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(0,0,0,maxx,maxy))
+    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(Rotations[0],Rotations[1],Rotations[2],maxx,maxy))
     f.close()
 
-    print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,0,0,0)
+    print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,Rotations[0],Rotations[1],Rotations[2])
     print "Time for Prealignement : %f s"%(time.time()-last_time)
 
-    return [[0,0,0,maxx,maxy]], h_dist_x, h_dist_y
+    return [[Rotations[0],Rotations[1],Rotations[2],maxx,maxy]], h_dist_x, h_dist_y
 
 
 
@@ -923,7 +923,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     xr= np.array([0,0,rZ])
     
     argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut        
-    resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': 0.000001 , 'eps':0.5, 'maxiter' : 15 })
+    resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': gtol , 'eps':0.5, 'maxiter' : 15 })
     print "resr", resr
     print "best guess for rotation matrix: resr.x", resr.x
     if resr.success == False:
@@ -978,11 +978,40 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #param 2: number of events we are running on
 #param 3: number of skiped events
 #
-def FindSigmaMin(dataSet,nevent,skip) :
-    xsigmachargeX = np.array([0.005])
-    xsigmachargeY = np.array([0.005])
-    ressigmachargeX = minimize(TotalSigmaFunctionX,xsigmachargeX,[xsigmachargeY,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
-    ressigmachargeY = minimize(TotalSigmaFunctionY,xsigmachargeY,[ressigmachargeX.x,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
+def FindSigmaMin(dataSet,nevent,skip=1) :
+    
+    grX = TGraph(100)
+    grY = TGraph(100) 
+    
+    bestsigma=1000
+    bestres=1000    
+    for sigmaint in range(100) :
+    	sigma=sigmaint*1e-4
+	
+	
+	
+    	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip)
+    	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip)
+	res=resX/2.0+resY/2.0
+	grX.SetPoint(sigmaint,sigma,resX)
+	grY.SetPoint(sigmaint,sigma,resY)
+	
+	if (res < bestres) : 
+		bestres=res
+		bestsigma=sigma
+    grX.Draw("AL")
+    grY.Draw("same")
+    print "Best Sigma found at : %f um for resolution : %f um"%(bestsigma*1000,bestres*1000)
+    blah=raw_input()
+     
+    return bestres,bestres
+     
+     
+	    
+#    xsigmachargeX = np.array([0.005])
+#    xsigmachargeY = np.array([0.005])
+#    ressigmachargeX = minimize(TotalSigmaFunctionX,xsigmachargeX,[xsigmachargeY,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
+#    ressigmachargeY = minimize(TotalSigmaFunctionY,xsigmachargeY,[ressigmachargeX.x,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
 
     return ressigmachargeX.x ,ressigmachargeY.x
 
