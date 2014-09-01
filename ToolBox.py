@@ -901,7 +901,7 @@ def PerformAlignement(aDataSet, boundary) :
     return res.x[0:3],res.x[3:]
 
 
-def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,step=0.05,Rotations=[0,0,0]) :
+def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,Rotations=[0,0,0]) :
     x_tx = np.array([0.])
     x_ty = np.array([0.])
     xr= np.array(Rotations)
