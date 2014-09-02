@@ -153,7 +153,7 @@ for i in range(0,n_proc) :
     else:
         # print "this is a new event, will cluster"
         etacorr_sigma = 0.003
-        aDataSet.ClusterEvent(i, method_name, etacorr_sigma, scaler)
+        aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
         clusters_tmp = aDataSet.AllClusters[i]
     prev_pixel_xhits = pixel_x_hits
 

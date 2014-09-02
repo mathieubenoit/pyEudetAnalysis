@@ -222,7 +222,7 @@ print alignment_constants
 
 for i in range(0,n_proc,scaler) :
     aDataSet.getEvent(i)
-    aDataSet.ClusterEvent(i,method_name,0.003,scaler)
+    aDataSet.ClusterEvent(i,method_name,0.003)
     #print "Event %i"%i
     for ind in range(i,i+scaler):
     #print "copying to event %i"%ind
