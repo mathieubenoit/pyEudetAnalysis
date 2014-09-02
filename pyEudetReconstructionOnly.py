@@ -124,8 +124,6 @@ can_chi2ndof.SetLogx()
 can_chi2ndof.SetLogy()
 can_chi2ndof.SaveAs("%s/Run%i/Chi2ndof_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
-scaler = 1
-
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
 
@@ -177,24 +175,23 @@ print alignment_constants
 
 distances_histo = TH1F("distances_histo","",100,0.0,1.0)
 
-for i in range(0,n_proc,scaler) :
+for i in range(0,n_proc) :
     aDataSet.getEvent(i)
     aDataSet.ClusterEvent(i,method_name,0.003)
-    for ind in range(i,i+scaler):
 
-        aDataSet.GetTrack(ind)
+    aDataSet.GetTrack(i)
 
-        for alignement in alignment_constants :
-            ApplyAlignment_at_event(ind,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
+    for alignement in alignment_constants :
+        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
 
-        aDataSet.FindMatchedCluster(ind,0.1,6,distances_histo)
-        m,me=aDataSet.ComputeResiduals(ind)
-        n_matched+=m
-        n_matched_edge+=me
-        if ind%1000 ==0 :
-            print "Event %d"%ind
-            print "Elapsed time/1000 Event : %f s"%(time.time()-last_time)
-            last_time = time.time()
+    aDataSet.FindMatchedCluster(i,0.1,6,distances_histo)
+    m,me=aDataSet.ComputeResiduals(i)
+    n_matched+=m
+    n_matched_edge+=me
+    if i%1000 ==0 :
+        print "Event %d"%i
+        print "Elapsed time/1000 Event : %f s"%(time.time()-last_time)
+        last_time = time.time()
 
 
 print "Found %i matched cluster"%(n_matched)
