@@ -179,7 +179,7 @@ distances_histo = TH1F("distances_histo","",100,0.0,1.0)
 
 for i in range(0,n_proc,scaler) :
     aDataSet.getEvent(i)
-    aDataSet.ClusterEvent(i,method_name,0.003,scaler)
+    aDataSet.ClusterEvent(i,method_name,0.003)
     for ind in range(i,i+scaler):
 
         aDataSet.GetTrack(ind)

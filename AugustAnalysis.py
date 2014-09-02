@@ -60,7 +60,7 @@ aDataSet = EudetData("/VertexScratch/TB_Data/DESY_TB_DATA_August2013_results/his
 
 for i in range(0,n_proc,scaler) :
     aDataSet.getEvent(i)
-    aDataSet.ClusterEvent(i,method_name,0.003,scaler)
+    aDataSet.ClusterEvent(i,method_name,0.003)
     for ind in range(i,i+scaler):
         aDataSet.GetTrack(ind)
         #aDataSet.FindMatchedCluster(ind, 0.350, 0.350,6)
