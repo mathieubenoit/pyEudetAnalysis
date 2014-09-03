@@ -332,6 +332,55 @@ class Cluster:
                 self.relY/=self.totalTOT
 
 
+        elif(self.size==3) :
+            if(self.sizeX==2 and self.sizeY==2) :
+                # copy original row, col, tot to keep safe
+                orig_row = list(self.row)
+                orig_col = list(self.col)
+                orig_tot = list(self.tot)
+
+                # calculate and add missing pixel
+                for i in xrange(len(self.row)):
+                    if self.row.count(self.row[i]) == 1:
+                        self.row.append(self.row[i])
+                    if self.col.count(self.col[i]) == 1:
+                        self.col.append(self.col[i])
+                        self.tot.append(1.0)
+
+                # proceed as 4 cluster case
+                for i in xrange(len(self.row)):
+                    if self.row[i] == min(self.row) and self.col[i] == min(self.col):
+                        bottomlefti = i
+                    if self.row[i] == max(self.row) and self.col[i] == max(self.col):
+                        toprighti = i
+                    if self.row[i] == min(self.row) and self.col[i] == max(self.col):
+                        toplefti = i
+                    if self.row[i] == max(self.row) and self.col[i] == min(self.col):
+                        bottomrighti = i
+                Qrel1 = self.tot[bottomlefti] / (self.tot[bottomlefti] + self.tot[toprighti])
+                Qrel2 = self.tot[bottomrighti] / (self.tot[bottomrighti] + self.tot[toplefti])
+
+                shift1X,shift1Y = shiftDiag(sigmaX,sigmaY,Qrel1)
+                shift2X,shift2Y = shiftDiag(sigmaX,sigmaY,Qrel2)
+
+                self.relX = max(self.col)*pitchX - shift1X - shift2X
+                self.relY = max(self.row)*pitchY - shift1Y + shift2Y
+
+                # put back original row, col, tmp
+                self.row = orig_row
+                self.col = orig_col
+                self.tot = orig_tot
+
+            else : # not 2x2 -> using the simple Qweighted centroid
+                self.relX=0.
+                self.relY=0.
+                for index,tot_tmp in enumerate(self.tot) :
+                    self.relX+=(self.col[index]*pitchX + pitchX/2.)*tot_tmp
+                    self.relY+=(self.row[index]*pitchY + pitchY/2.)*tot_tmp
+                self.relX/=self.totalTOT
+                self.relY/=self.totalTOT
+
+
         else : #other cluster sizes->using the simple Qweighted centroid
             self.relX=0.
             self.relY=0.
