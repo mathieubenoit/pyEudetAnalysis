@@ -399,29 +399,29 @@ resX_s2x1y2 = TH1D("resX_s2x1y2","Unbiased residual X, cluster size = 2, sizeX =
 resY_s2x1y2 = TH1D("resY_s2x1y2","Unbiased residual Y, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
 resX_s2x1y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
 resY_s2x1y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-h1_style(resX_s2x1y2)
-h1_style(resY_s2x1y2)
+h1_style(resX_s2x1y2,1)
+h1_style(resY_s2x1y2,1)
 
 resX_s2x2y2 = TH1D("resX_s2x2y2","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resY_s2x2y2 = TH1D("resY_s2x2y2","Unbiased residual Y, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resX_s2x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
 resY_s2x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-h1_style(resX_s2x2y2)
-h1_style(resY_s2x2y2)
+h1_style(resX_s2x2y2,1)
+h1_style(resY_s2x2y2,1)
 
 resX_s3x2y2 = TH1D("resX_s3x2y2","Unbiased residual X, cluster size = 3, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resY_s3x2y2 = TH1D("resY_s3x2y2","Unbiased residual Y, cluster size = 3, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resX_s3x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
 resY_s3x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-h1_style(resX_s3x2y2)
-h1_style(resY_s3x2y2)
+h1_style(resX_s3x2y2,1)
+h1_style(resY_s3x2y2,1)
 
 resX_s4x2y2 = TH1D("resX_s4x2y2","Unbiased residual X, cluster size = 4, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resY_s4x2y2 = TH1D("resY_s4x2y2","Unbiased residual Y, cluster size = 4, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resX_s4x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
 resY_s4x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-h1_style(resX_s4x2y2)
-h1_style(resY_s4x2y2)
+h1_style(resX_s4x2y2,1)
+h1_style(resY_s4x2y2,1)
 
 for j,tracks in enumerate(aDataSet.AllTracks) :
     for track in tracks :
