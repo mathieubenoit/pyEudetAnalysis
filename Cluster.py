@@ -169,11 +169,7 @@ class Cluster:
 
             elif(self.sizeX==2 and self.sizeY==2) :
                 # cluster size 2 with sizeX = 2 and sizeY = 2 i.e. 2 pixels on a diagonal
-                Qrel = self.tot[self.col.index(min(self.col))] / self.totalTOT
-                clu_grad = (self.col[self.row.index(min(self.row))] - self.col[self.row.index(max(self.row))]) / (min(self.row) - max(self.row))
-                shiftX,shiftY = shiftDiag(sigmaX,sigmaY,Qrel)
-                self.relX = max(self.col)*pitchX - shiftX
-                self.relY = max(self.row)*pitchY - clu_grad*shiftY
+                self.GetMaxTOTCentroid()
 
 
         elif(self.size==4) :
