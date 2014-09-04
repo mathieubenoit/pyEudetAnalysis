@@ -10,17 +10,17 @@ from ToolBox import *
 
 
 #
-#Compute the additional shift for the hit position du to the charge sharing (eta correction) when neighbor pixels are on the same raw or the same column (neighbor pixels aligned)
-#first parameter:sigma of the eta correction (charge sharing)
-#second parameter:relative charge i.e. Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
-#shiftLat
+# Compute the shift in the hit position due to the charge sharing (eta correction) when neighbour pixels are on the same row or the same column
+# first parameter: sigma of the eta correction (charge sharing)
+# second parameter: relative charge Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
+#
 def shiftLat(sigma_tmp,Qrel_tmp):
     return sigma_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)
 
 #
-#Compute the additional shift for the hit position du to the charge sharing (eta correction) when neighbor pixels are on a diadonal
-#first parameter:sigma of the eta correction (charge sharing)
-#second parameter:relative charge i.e. Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
+# Compute the shift in the hit position due to the charge sharing (eta correction) when neighbour pixels are on a diadonal
+# first parameter: sigma of the eta correction (charge sharing)
+# second parameter: relative charge Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
 #
 def shiftDiag(sigmaX_tmp,sigmaY_tmp,Qrel_tmp):
     return sigmaX_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)*1./sqrt(2.),sigmaY_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)*1./sqrt(2.)
@@ -44,12 +44,12 @@ class Cluster:
     totalTOT =0
     aspectRatio = 0
 
-# local coordinates
+    # local coordinates
     relX = 0.
     relY = 0.
     relZ = 0.
 
-# telescope coordinates
+    # telescope coordinates
     absX =-10000.
     absY =-10000.
     absZ =-10000.
@@ -147,8 +147,7 @@ class Cluster:
 #compute the hit position as the Qweighted method but adding an eta correction du to the charge sharing between the fired pixels
 #
     def GetEtaCorrectedQWeightedCentroid(self,sigmaX=0.003,sigmaY=0.003) :
-#     def GetEtaCorrectedQWeightedCentroid(self) :
-#         global n_sizeX2sizeY2
+
         maxTOTindex_tmp = 0
         minTOTindex_tmp = 0
         maxTOT_tmp=self.tot[0]
@@ -165,11 +164,10 @@ class Cluster:
         self.relY=-1000
         self.absX=-1000
         self.absY=-1000
-        #self.GetQWeightedCentroid()
 
         if(self.size==2) :
             for index,tot_tmp in enumerate(self.tot) :
-#looking for the pixel with high energy deposition
+                # looking for the pixel with high energy deposition
                 if self.tot[index]>maxTOT_tmp:
                     maxTOT_tmp=self.tot[index]
                     maxTOTindex_tmp=index
@@ -178,96 +176,71 @@ class Cluster:
                 else :
                     minTOTindex_tmp = 1
 
-
-#computing the relative charge i.e. Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
+            # computing the relative charge i.e. Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
             Qrel = (self.tot[maxTOTindex_tmp])/(self.totalTOT)
 
-#check-cross
-#                 self.Print()
-#                 print "TMath.ErfInverse(2.*Qrel-1.) : %f"%(float(TMath.ErfInverse(2.*Qrel-1.)))
-#                 print "sigma : %f"%(float(sigma))
-#                 print sigma
-#                 print "sigma*TMath.ErfInverse(2.*Qrel-1.) : %f"%(float(sigma)*TMath.ErfInverse(2.*Qrel-1.))
-#                 print 'self.sizeX : %i'%self.sizeX
-#                 print 'self.sizeY : %i'%self.sizeY
-#                 print 'maxTOTindex_tmp : %i'%maxTOTindex_tmp
-#                 print 'self.row[maxTOTindex_tmp]*pitchY : %f'%(float(self.row[maxTOTindex_tmp])*pitchY)
-#                 print 'self.col[maxTOTindex_tmp]*pitchY : %f'%(float(self.col[maxTOTindex_tmp])*pitchY)
-
-#distinguishing the 3 cases 'cluster size 2x1','cluster size 1x2' and 'cluster size 2x2'
+            # distinguishing the 3 cases 'cluster size 2x1','cluster size 1x2' and 'cluster size 2x2'
             if(self.sizeX==2 and self.sizeY==1) :
-            #cluster size 2x1
+                # cluster size 2x1
                 if(self.col[maxTOTindex_tmp]>self.col[minTOTindex_tmp]) :
-                #neighbor on the left side
+                    # neighbor on the left side
                     self.relX = self.col[maxTOTindex_tmp]*pitchX + shiftLat(sigmaX,Qrel)
                     self.relY = self.row[maxTOTindex_tmp]*pitchY +pitchY/2.
                 elif(self.col[maxTOTindex_tmp]<self.col[minTOTindex_tmp]) :
-                #neighbor on the right side
+                    # neighbor on the right side
                     self.relX = (self.col[maxTOTindex_tmp]+1.)*pitchX - shiftLat(sigmaX,Qrel)
                     self.relY = self.row[maxTOTindex_tmp]*pitchY +pitchY/2.
-#                     print "relX : %f"%float(self.relX)
-#                     print "relY : %f"%float(self.relY)
+
             elif(self.sizeX==1 and self.sizeY==2) :
-            #cluster size 1x2
+                # cluster size 1x2
                 if(self.row[maxTOTindex_tmp]>self.row[minTOTindex_tmp]) :
-                #neighbor on the bottom side
+                    # neighbor on the bottom side
                     self.relX = self.col[maxTOTindex_tmp]*pitchX + pitchX/2.
                     self.relY = self.row[maxTOTindex_tmp]*pitchY + shiftLat(sigmaY,Qrel)
                 elif(self.row[maxTOTindex_tmp]<self.row[minTOTindex_tmp]) :
-                #neighbor on the top side
+                    # neighbor on the top side
                     self.relX = self.col[maxTOTindex_tmp]*pitchX + pitchX/2.
                     self.relY = (self.row[maxTOTindex_tmp]+1.)*pitchY - shiftLat(sigmaY,Qrel)
+
             elif(self.sizeX==2 and self.sizeY==2) :
-            #cluster size 2 with sizeX = 2 and sizeY = 2 i.e. 2 pixels on a diagonal
-                #print"cluster sizeX : 2 ; sizeY : 2 ; size : 2"
-#                     n_sizeX2sizeY2 = n_sizeX2sizeY2 + 1
+                # cluster size 2 with sizeX = 2 and sizeY = 2 i.e. 2 pixels on a diagonal
                 shiftX,shiftY = shiftDiag(sigmaX,sigmaY,Qrel)
                 if(self.col[maxTOTindex_tmp]>self.col[minTOTindex_tmp] and self.row[maxTOTindex_tmp]>self.row[minTOTindex_tmp]) :
                     self.relX = self.col[maxTOTindex_tmp]*pitchX + shiftX
                     self.relY = self.row[maxTOTindex_tmp]*pitchY + shiftY
-                    #self.relX = 1111
-                    #self.relY = 1111
 
                 elif(self.col[maxTOTindex_tmp]<self.col[minTOTindex_tmp] and self.row[maxTOTindex_tmp]<self.row[minTOTindex_tmp]) :
                     self.relX = (self.col[maxTOTindex_tmp]+1.)*pitchX - shiftX
                     self.relY = (self.row[maxTOTindex_tmp]+1.)*pitchY - shiftY
-                    #self.relX = 1111
-                    #self.relY = 1111
 
                 elif(self.col[maxTOTindex_tmp]>self.col[minTOTindex_tmp] and self.row[maxTOTindex_tmp]<self.row[minTOTindex_tmp]) :
                     self.relX = self.col[maxTOTindex_tmp]*pitchX + shiftX
                     self.relY = (self.row[maxTOTindex_tmp]+1.)*pitchY - shiftY
-                    #self.relX = 1111
-                    #self.relY = 1111
-
 
                 elif(self.col[maxTOTindex_tmp]<self.col[minTOTindex_tmp] and self.row[maxTOTindex_tmp]>self.row[minTOTindex_tmp]) :
                     self.relX = (self.col[maxTOTindex_tmp]+1.)*pitchX - shiftX
                     self.relY = self.row[maxTOTindex_tmp]*pitchY + shiftY
-                    #self.relX = 1111
-                    #self.relY = 1111
-
 
 
         elif(self.size==4) :
             if(self.sizeX==2 and self.sizeY==2) :
 
-#looking for the pixel with the highest energy
+                # looking for the pixel with the highest energy
                 for index,tot_tmp in enumerate(self.tot) :
                     if self.tot[index]>maxTOT_tmp:
                         maxTOT1_tmp=self.tot[index]
                         maxTOTindex1_tmp=index
 
-#finding the second pixel to build a pixels pair on a diagonal
+                # finding the second pixel to build a pixels pair on a diagonal
                 for index,tot_tmp in enumerate(self.tot) :
                     if (abs(self.col[maxTOTindex1_tmp] - self.col[index]) == 1 and abs(self.row[maxTOTindex1_tmp] - self.row[index]) == 1) :
                         minTOTindex1_tmp = index
 
-#computing the first hit position shift du to the eta correction for this first pixels couple
+                # computing the first hit position shift du to the eta correction for this first pixels couple
                 Qrel1 = (self.tot[maxTOTindex1_tmp])/(self.tot[maxTOTindex1_tmp] + self.tot[minTOTindex1_tmp])
                 shift1X,shift1Y = shiftDiag(sigmaX,sigmaY,Qrel1)
 
-#finding the second pixels pair on a diagonal and looking for the one between the 2 which has the highest energy
+                # finding the second pixels pair on a diagonal and looking for the one between the 2 which has the highest energy
                 for index,tot_tmp in enumerate(self.tot) :
                     if (index != maxTOTindex1_tmp and index != minTOTindex1_tmp) :
                         index2_tmp.append(index)
@@ -280,33 +253,33 @@ class Cluster:
                     maxTOTindex2_tmp = index2_tmp[1]
                     minTOTindex2_tmp = index2_tmp[0]
 
-#computing the second hit position shift du to the eta correction for this second pixels couple
+                # computing the second hit position shift du to the eta correction for this second pixels couple
                 Qrel2 = (self.tot[maxTOTindex2_tmp])/(self.tot[maxTOTindex2_tmp] + self.tot[minTOTindex2_tmp])
                 shift2X,shift2Y = shiftDiag(sigmaX,sigmaY,Qrel2)
 
-#computing the eta corrected position of the hit
+                # computing the eta corrected position of the hit
                 if(self.col[maxTOTindex1_tmp] < self.col[minTOTindex1_tmp] and self.row[maxTOTindex1_tmp] > self.row[minTOTindex1_tmp]) :
-                #pixel from pair 1 with highest energy on the left top corner
+                    # pixel from pair 1 with highest energy on the left top corner
                     if(self.col[maxTOTindex2_tmp] < self.col[minTOTindex2_tmp]) :
-                    #pixel from pair 2 with highest energy on the left bottom corner
+                        # pixel from pair 2 with highest energy on the left bottom corner
                         self.relX = (self.col[maxTOTindex1_tmp]+1.)*pitchX - shift1X - shift2X
                         self.relY = (self.row[maxTOTindex1_tmp])*pitchY + shift1Y - shift2Y
                     else :
-                    #pixel from pair 2 with highest energy on the right top corner
+                        # pixel from pair 2 with highest energy on the right top corner
                         self.relX = (self.col[maxTOTindex1_tmp]+1.)*pitchX - shift1X + shift2X
                         self.relY = (self.row[maxTOTindex1_tmp])*pitchY + shift1Y + shift2Y
                 elif(self.col[maxTOTindex1_tmp] > self.col[minTOTindex1_tmp] and self.row[maxTOTindex1_tmp] < self.row[minTOTindex1_tmp]) :
-                #pixel from pair 1 with highest energy on the right bottom corner
+                    # pixel from pair 1 with highest energy on the right bottom corner
                     if(self.col[maxTOTindex2_tmp] < self.col[minTOTindex2_tmp]) :
-                    #pixel from pair 2 with highest energy on the left bottom corner
+                        # pixel from pair 2 with highest energy on the left bottom corner
                         self.relX = (self.col[maxTOTindex1_tmp])*pitchX + shift1X - shift2X
                         self.relY = (self.row[maxTOTindex1_tmp]+1.)*pitchY - shift1Y - shift2Y
                     else :
-                    #pixel from pair 2 with highest energy on the right top corner
+                        # pixel from pair 2 with highest energy on the right top corner
                         self.relX = (self.col[maxTOTindex1_tmp])*pitchX + shift1X + shift2X
                         self.relY = (self.row[maxTOTindex1_tmp]+1.)*pitchY - shift1Y + shift2Y
                 elif(self.col[maxTOTindex1_tmp] < self.col[minTOTindex1_tmp] and self.row[maxTOTindex1_tmp] < self.row[minTOTindex1_tmp]) :
-                #pixel from pair 1 with highest energy on the left bottom corner
+                    # pixel from pair 1 with highest energy on the left bottom corner
                     if(self.col[maxTOTindex2_tmp] < self.col[minTOTindex2_tmp]) :
                         self.relX = (self.col[maxTOTindex1_tmp]+1.)*pitchX - shift1X - shift2X
                         self.relY = (self.row[maxTOTindex1_tmp]+1.)*pitchY - shift1Y + shift2Y
@@ -314,7 +287,7 @@ class Cluster:
                         self.relX = (self.col[maxTOTindex1_tmp]+1.)*pitchX - shift1X + shift2X
                         self.relY = (self.row[maxTOTindex1_tmp]+1.)*pitchY - shift1Y - shift2Y
                 elif(self.col[maxTOTindex1_tmp] > self.col[minTOTindex1_tmp] and self.row[maxTOTindex1_tmp] > self.row[minTOTindex1_tmp]) :
-                #pixel from pair 1 with highest energy on the right top corner
+                    # pixel from pair 1 with highest energy on the right top corner
                     if(self.col[maxTOTindex2_tmp] < self.col[minTOTindex2_tmp]) :
                         self.relX = (self.col[maxTOTindex1_tmp])*pitchX + shift1X - shift2X
                         self.relY = (self.row[maxTOTindex1_tmp])*pitchY + shift1Y + shift2Y
@@ -381,7 +354,7 @@ class Cluster:
                 self.relY/=self.totalTOT
 
 
-        else : #other cluster sizes->using the simple Qweighted centroid
+        else : # other cluster sizes -> using the simple Qweighted centroid
             self.relX=0.
             self.relY=0.
             for index,tot_tmp in enumerate(self.tot) :
@@ -395,8 +368,6 @@ class Cluster:
                 self.GetDigitalCentroid()
 
 
-        #print "relX : %f"%float(self.relX)
-        #print "relY : %f"%float(self.relY)
         self.absX=self.relX  -npix_X*pitchX/2.
         self.absY=self.relY  -npix_Y*pitchY/2.
         self.absZ=0
