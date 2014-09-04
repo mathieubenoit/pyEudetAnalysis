@@ -103,8 +103,6 @@ gStyle.SetOptFit(1111)
 aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,RunNumber,"tbtrack")
 
 
-scaler = 1
-
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
 
