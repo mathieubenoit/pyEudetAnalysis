@@ -174,18 +174,20 @@ cantccory1 = TCanvas()
 tccory1.Draw("colz")
 
 print "Press any key to continue, ctrl-D to stop"
-bla = raw_input()
+#bla = raw_input()
 
 
 print "Performing prealignment"
-alignment_constants, prealix, prealiy = PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,0])
+alignment_constants, prealix, prealiy = PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,180])
+
+
 canprealix = TCanvas()
 prealix.Draw()
 canprealiy = TCanvas()
 prealiy.Draw()
 
 print "Press any key to continue, ctrl-D to stop"
-b=raw_input() 
+#b=raw_input() 
 
 last_time = time.time()
 
@@ -213,7 +215,7 @@ tccory2.Draw("colz")
 
 niter = 2
 for i in range(niter) :
-    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,1,0.05,AlignementPath,1e-3,[0,0,0])
+    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,1,0.05,AlignementPath,1e-4)
     ApplyAlignment(aDataSet,rest,resr)
 
 
