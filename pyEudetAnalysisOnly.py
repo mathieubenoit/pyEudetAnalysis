@@ -213,9 +213,12 @@ n_matched_in_main = 0
 n_matched_in_edge = 0
 last_time = time.time()
 
+
+etasx,etasy=FindSigmaMin(aDataSet,5000)
+
 for i in range(n_proc-1) :
     aDataSet.FindMatchedCluster(i,0.1,6)
-    aDataSet.ComputePosition(i,method_name,0.003)
+    aDataSet.ComputePosition(i,method_name,(etasx+etasy)/2.0)
     m,me = aDataSet.ComputeResiduals(i)
     n_matched_in_main += m
     n_matched_in_edge += me
