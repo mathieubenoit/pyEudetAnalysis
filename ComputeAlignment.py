@@ -9,32 +9,32 @@ from optparse import OptionParser
 
 parser = OptionParser()
 parser.add_option("-r", "--run",
-                  help="Run Number", dest="RUN", type="int")
+                  help="Run number", dest="RUN", type="int")
 
 parser.add_option("-n", "--nevent",
                   help="Number of events to process", dest="NEVENT")
 
 parser.add_option("-m", "--method",
-                  help="Position Reconstruction Method, QWeighted,  DigitalCentroid, maxTOT, EtaCorrection", dest="METHOD", default="QWeighted")
+                  help="Position reconstruction method (QWeighted, DigitalCentroid, maxTOT, EtaCorrection)", dest="METHOD", default="QWeighted")
 
 parser.add_option("-d", "--data",
-                  help="tbtrack Input Folder", dest="INPUT")
+                  help="Path to tbtrack input folder", dest="INPUT")
 
 parser.add_option("-o", "--output",
-                  help="Histograms and results output folder", dest="OUTPUT", default=".")
+                  help="Path to histograms and results output folder", dest="OUTPUT", default=".")
 
 parser.add_option("-a", "--alignment",
-                  help="alignement file", dest="ALIGNMENT", default="alignement.dat")
+                  help="Path to alignment file", dest="ALIGNMENT", default="alignment.txt")
 
 parser.add_option("-e", "--edge",
-                  help="edge width", dest="EDGE", default=0.0, type="float")
+                  help="Edge width", dest="EDGE", default=0.0, type="float")
 
 (options, args) = parser.parse_args()
 
 if(options.RUN) :
     RunNumber = int(options.RUN)
 else :
-    print "Please provide a Run Number (-r [Run Number])"
+    print "Please provide a run number (-r [run number])"
     parser.print_help()
     exit()  
      
@@ -53,33 +53,34 @@ if(options.METHOD) :
     elif(options.METHOD=="EtaCorrection"):
         method_name=options.METHOD
     else :
-        print "Please provide a valid cluster position reconstruction method ( -m [method]  QWeighted,maxTOT,DigitalControid,EtaCorrection)"
+        print "Please provide a valid cluster position reconstruction method (-m [method])"
         parser.print_help()
         exit()
 
 else:
-    print "Please provide a valid cluster position reconstruction method ( -m [method]  QWeighted,maxTOT,DigitalControid,EtaCorrection)"
+    print "Please provide a valid cluster position reconstruction method (-m [method])"
     parser.print_help()
     exit()
 
 if(options.INPUT):
     input_folder=options.INPUT
 else :
-    print "Please provide an input folder with tbtrack files (-d [PathToData] , put no / at the end )"
+    print "Please provide path to input folder with tbtrack files (-d [PathToData], put no / at the end)"
     parser.print_help()
     exit()
 
 if(options.OUTPUT):
     PlotPath=options.OUTPUT
 else :
-    print "Please provide an output folder with tbtrack files (-o [PathToOutput] , put no / at the end )"
+    print "Please provide path to output folder for histograms and results (-o [PathToOutput], put no / at the end)"
     parser.print_help()
     exit()
 
 if(options.ALIGNMENT):
-    AlignementPath = "%s"%(options.ALIGNMENT)
+    AlignmentPath = "%s/Alignment.txt"%(options.ALIGNMENT)
 else :
-    print "Please provide an Alignment File (-a [PathToFile]  0 0 0 0 0 if no alignement needed )"
+    print "Please provide path for alignment file (-a [PathToFile], put no / at the end)"
+    print "The file name will be created to include run, method, nevents, skip"
     parser.print_help()
     exit()
 
@@ -104,17 +105,24 @@ aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,e
 
 
 if(options.NEVENT):
-    n_proc= int(options.NEVENT)
-
-    if n_proc >= aDataSet.t_nEntries:
-        n_proc = -1
-    if n_proc == -1:
-        n_proc = aDataSet.t_nEntries
-
-else :
+    if int(options.NEVENT) > aDataSet.p_nEntries or int(options.NEVENT) == -1:
+        n_proc = aDataSet.p_nEntries
+    else:
+        n_proc= int(options.NEVENT)
+        print "WARNING it is strongly recommended to use all events in the run (-n -1)"
+        print "WARNING this ensures the best alignment for the whole run"
+else:
     n_proc= aDataSet.t_nEntries
 
-print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
+if n_proc > 10000:
+    skip = int((n_proc)/10000.)
+else:
+    skip = 1
+print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber,method_name,n_proc,skip)
+
+dot = AlignmentPath.rfind('.')
+AlignmentPath = AlignmentPath[:dot] + '_run%i_%s_%i_%i' %(RunNumber, method_name, int(options.NEVENT), skip) + AlignmentPath[dot:]
+print "Alignment path will be", AlignmentPath
 
 histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
 
@@ -146,10 +154,10 @@ for i in range(0,n_proc) :
         pixel_x_hits.append(aDataSet.p_col[k])
 
     if (pixel_x_hits == prev_pixel_xhits):
-        # print "same pixel map as before, will add clusters already computed"
+        # same pixel map as before, will add clusters already computed
         aDataSet.AllClusters.append(clusters_tmp)
     else:
-        # print "this is a new event, will cluster"
+        # this is a new event, will cluster
         etacorr_sigma = 0.003
         aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
         clusters_tmp = aDataSet.AllClusters[i]
@@ -176,7 +184,7 @@ bla = raw_input()
 
 
 print "Performing prealignment"
-alignment_constants, prealix, prealiy = PerformPreAlignement(aDataSet,n_proc,1,AlignementPath,6,[0,0,0])
+alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
 canprealix = TCanvas()
 prealix.Draw()
 canprealiy = TCanvas()
@@ -189,14 +197,14 @@ last_time = time.time()
 
 for i in range(0,n_proc) :
 
-    for alignement in alignment_constants :
-        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
+    for alignment in alignment_constants :
+        ApplyAlignment_at_event(i,aDataSet,[alignment[3],alignment[4],0],[alignment[0],alignment[1],alignment[2]])
 
     aDataSet.FindMatchedCluster(i,0.3,6)
     a,b=aDataSet.ComputeResiduals(i)
     if i%1000 ==0 :
         print "Event %d"%i
-        print "Elapsed time/1000 Event. Apply Alignement and TrackMatching : %f s"%(time.time()-last_time)
+        print "Elapsed time/1000 Event. Apply Alignment and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
 
@@ -211,7 +219,7 @@ tccory2.Draw("colz")
 
 niter = 2
 for i in range(niter) :
-    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,1,0.05,AlignementPath,1e-3,[0,0,0])
+    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.05,AlignmentPath,1e-5,[0,0,0])
     ApplyAlignment(aDataSet,rest,resr)
 
 
@@ -233,7 +241,7 @@ for i in range(0,n_proc) :
     n_matched+=a
     if i%1000 ==0 :
         print "Event %d"%i
-        print "Elapsed time/1000 Event. Apply Alignement and TrackMatching : %f s"%(time.time()-last_time)
+        print "Elapsed time/1000 Event. Apply Alignment and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
       
@@ -254,4 +262,4 @@ prealix.Write()
 prealiy.Write()
 
 print "Found %i matched track-cluster binome"%n_matched
-print "Produced Alignment file %s"%AlignementPath
+print "Produced Alignment file %s"%AlignmentPath
