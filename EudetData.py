@@ -719,7 +719,8 @@ class EudetData:
 
 
         if(filter_cluster) :
-            self.AllClusters[i] = matched_clusters
+            if(i<len(self.AllClusters)):
+	    	self.AllClusters[i] = matched_clusters
         else :
             self.AllClusters[i] = clusters_tmp
 
@@ -810,16 +811,18 @@ class EudetData:
 
     def ComputePosition(self,i,method="QWeighted",sigma=0.003):
 
-        for cluster in self.AllClusters[i] :
-            cluster.Statistics()
-            if (method=="QWeighted"):
-                cluster.GetQWeightedCentroid()
-            elif (method=="DigitalCentroid"):
-                cluster.GetDigitalCentroid()
-            elif (method=="maxTOT"):
-                cluster.GetMaxTOTCentroid()
-            elif (method=="EtaCorrection"):
-                cluster.GetEtaCorrectedQWeightedCentroid(sigma)
+        
+	if(i<len(self.AllClusters)):
+    	    for cluster in self.AllClusters[i] :
+                cluster.Statistics()
+                if (method=="QWeighted"):
+                    cluster.GetQWeightedCentroid()
+                elif (method=="DigitalCentroid"):
+                    cluster.GetDigitalCentroid()
+                elif (method=="maxTOT"):
+                    cluster.GetMaxTOTCentroid()
+                elif (method=="EtaCorrection"):
+                    cluster.GetEtaCorrectedQWeightedCentroid(sigma)
 
 
 
