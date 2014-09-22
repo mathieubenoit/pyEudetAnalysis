@@ -546,7 +546,7 @@ class EudetData:
 
                         if(self.IsInEdges(track)):
                             nmatch_in_edge += 1.
-                        else:
+                        else :
                             nmatch_in_main += 1.
 
         return nmatch_in_main, nmatch_in_edge
@@ -675,8 +675,11 @@ class EudetData:
         # clusters are matched to tracks using GetPixelResiduals
         # r_max: maximum radial distance allowed between track and any pixel of the cluster
 
-        clusters_tmp = self.AllClusters[i]
-        matched_clusters = []
+        try : 
+		clusters_tmp = self.AllClusters[i]
+        except: 
+		clusters_tmp = []
+	matched_clusters = []
         good_count = 0
 
         for track in self.AllTracks[i] :
