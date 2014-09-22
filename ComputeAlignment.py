@@ -91,10 +91,10 @@ else :
     exit()
 
 future_builtins.SensorType= "Timepix"
-if(options.SENSOR=="Timepix" or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
     future_builtins.SensorType=options.SENSOR
 else :
-    print "Please provide known sensor name. Timepix (default) or CLICpix"
+    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
     parser.print_help()
     exit()
 
@@ -201,8 +201,12 @@ print "Press any key to continue, ctrl-D to stop"
 
 
 print "Performing prealignment"
-alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
 
+if future_builtins.SensorType=="Timepix3" or future_builtins.SensorType=="CLICpix": 
+	"print adding 180 degree rotation around Z for Timepix3 and CLICpix data, please fix this if this is not what is wanted"
+	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
+else :
+	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
 
 canprealix = TCanvas()
 prealix.Draw()

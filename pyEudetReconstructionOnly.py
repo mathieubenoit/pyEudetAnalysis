@@ -32,7 +32,7 @@ parser.add_option("-e", "--edge",
                   help="edge width", dest="EDGE", default=0.0, type="float")
 
 parser.add_option("-s", "--sensor",
-                  help="Sensor type", dest="SENSOR", default="Timepix")
+                  help="Sensor type : Timepix, Timepix3 or CLICpix", dest="SENSOR", default="Timepix")
 
 (options, args) = parser.parse_args()
 
@@ -89,13 +89,12 @@ else :
     exit()
 
 future_builtins.SensorType= "Timepix"
-if(options.SENSOR=="Timepix" or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
     future_builtins.SensorType=options.SENSOR
 else :
-    print "Please provide known sensor name. Timepix (default) or CLICpix"
+    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
     parser.print_help()
     exit()
-    
     
     
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))

@@ -8,7 +8,7 @@ import future_builtins
 SensorType=future_builtins.SensorType
 
 
-if SensorType=="Timepix" :
+if "Timepix" in SensorType :
 # Timepix Specifications
     pitchX = 0.055
     pitchY = 0.055
