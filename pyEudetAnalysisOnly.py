@@ -214,7 +214,16 @@ n_matched_in_edge = 0
 last_time = time.time()
 
 
-etasx,etasy=FindSigmaMin(aDataSet,5000)
+#etasx,etasy=FindSigmaMin(aDataSet,5000)
+
+if (method_name == "EtaCorrection") :
+    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
+    print "ressigmachargeX : %f"%float(ressigmachargeX)
+    print "ressigmachargeY : %f"%float(ressigmachargeY)
+
+else: 
+    etasx=0.01
+    etasy=0.01
 
 for i in range(n_proc-1) :
     aDataSet.FindMatchedCluster(i,0.1,6)
@@ -297,13 +306,6 @@ hy.Draw("colz")
 cancory.SaveAs("%s/Run%i/%s/cory.pdf"%(PlotPath,RunNumber,method_name))
 
 
-
-if (method_name == "EtaCorrection") :
-    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
-    print "ressigmachargeX : %f"%float(ressigmachargeX)
-    print "ressigmachargeY : %f"%float(ressigmachargeY)
-
-    ApplyEtaCorrection(aDataSet,ressigmachargeX,ressigmachargeY)
 
 
 resX = TH1D("resX","Unbiased residual X",600,-0.150,0.150)
