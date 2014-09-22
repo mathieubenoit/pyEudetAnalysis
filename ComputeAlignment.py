@@ -147,7 +147,7 @@ for i in range(0,n_proc) :
     for k in xrange(npixels_hit):
         pixel_x_hits.append(aDataSet.p_col[k])
 
-    if (pixel_x_hits == prev_pixel_xhits):
+    if ((pixel_x_hits == prev_pixel_xhits) and len(pixel_x_hits)!=0):
         # print "same pixel map as before, will add clusters already computed"
         aDataSet.AllClusters.append(clusters_tmp)
     else:
