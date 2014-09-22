@@ -531,9 +531,10 @@ def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
             print "Correlation, event %i %f s elapsed"%(i,time.time()-last_time)
 
         for track in tracks :
-            for cluster in dataSet.AllClusters[i]:
-                histox.Fill(cluster.absX, track.trackX[track.iden.index(dut)])
-                histoy.Fill(cluster.absY, track.trackY[track.iden.index(dut)])
+            if(i<len(dataSet.AllClusters)):
+	        for cluster in dataSet.AllClusters[i]:
+                    histox.Fill(cluster.absX, track.trackX[track.iden.index(dut)])
+                    histoy.Fill(cluster.absY, track.trackY[track.iden.index(dut)])
 
     return histox,histoy
 
