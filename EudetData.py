@@ -517,14 +517,20 @@ class EudetData:
 
     def IsInEdges(self,track,dut=6):
         is_in = False
-        if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
+        
+	if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
             is_in = True
             if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
                 is_in=False
         return is_in
 
 
-
+    def IsInGoodRegion(self,track,dut=6) : 
+    
+        if (track.trackX[track.iden.index(dut)]>=((pitchX*npix_X)/2-4*pitchX) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.)) :
+ 	    return true
+	else : 
+	    return false
 
     def ComputeResiduals(self,i,dut=6) :
 
