@@ -267,7 +267,22 @@ class EudetData:
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
-
+ 
+ 
+    def PlotFrame(self,i,plot,n_pix_min=1) : 
+        
+	plot = TH2D("frame %i"%i,"frame %i"%i,npix_X,0,npix_X,npix_Y,0,npix_Y)
+	self.getEvent(i)
+	
+	if(len(self.p_col)>n_pix_min):
+	    for i,X in enumerate(self.p_col) : 
+	    	 plot.Fill(self.p_col[i],self.p_row[i],self.p_tot[i])
+	
+	    plot.Draw("colz")
+	    print "press enter for next frame"
+	    a=raw_input()
+	else : 
+	    print "Skipping event %i, empty"%i
 
     def WriteReconstructedData(self,filename,dut=6) :
         outfile = TFile(filename,'recreate')
