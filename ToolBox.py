@@ -542,8 +542,6 @@ def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
 def TotalMeanFunctionX(Translations,Rotations,aDataDet,nevents,skip,cut = 0.1,dut=6):
 
     totaldist_evaluator = 0.
-#    htempx = TH1D("x","",6000,-3,3)
-#    htempy = TH1D("y","",6000,-3,3)
     n = 0
     dist_tmp_x = []
     dist_tmp_y = []
@@ -577,7 +575,6 @@ def TotalMeanFunctionX(Translations,Rotations,aDataDet,nevents,skip,cut = 0.1,du
 
     print "Evaluating for Trans : %.9f %.9f  [mm] metric = %.9f  n = %i"%(Translations[0],0,fabs(totaldist_evaluator/n),n)
     return fabs(totaldist_evaluator/n)
-    # return -n
 
 
 def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.1,dut=6):
@@ -604,14 +601,6 @@ def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.1
                     dist_tmp_x.append(distx)
                     dist_tmp_y.append(disty)
 
-
-#     c_dist_x_2_tmp = TCanvas()
-#     c_dist_x_2_tmp.cd()
-#     h_dist_x_2.Draw()
-#     c_dist_y_2_tmp = TCanvas()
-#     c_dist_y_2_tmp.cd()
-#     h_dist_y_2.Draw()
-
     maxx_bin = h_dist_x_2.GetMaximumBin()
     maxx = h_dist_x_2.GetXaxis().GetBinCenter(maxx_bin)
     maxy_bin = h_dist_y_2.GetMaximumBin()
@@ -622,22 +611,15 @@ def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.1
             totaldist_evaluator+=eventy
             n+=1
 
-#                     if fabs(distx)<cutx and fabs(disty)<cuty:
-#                         totaldist_evaluator+=disty
-#                         n+=1
     print "Evaluating for Trans : %.9f %.9f  [mm] metric = %.9f  n = %i"%(Tx,Translations[0],fabs(totaldist_evaluator/n),n)
     return fabs(totaldist_evaluator/n)
-    # return -n
-
 
 
 def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0.1,dut=6):
 
-#    totaldist_evaluator = 0.
     n = 0
     dist_tmp_x = []
     dist_tmp_y = []
-
     dist_good_x = []
     dist_good_y = []
     rotationMatrix = RotationMatrix(Rotations)
@@ -655,41 +637,12 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
                     distx=cluster.absX -tmp[0]
                     disty=cluster.absY -tmp[1]
 
-                    if((distx*distx + disty*disty) < (cut*cut)):
-                        
+                    if((distx*distx + disty*disty) < (cut*cut)):                        
                         dist_tmp_x.append(distx)
                         dist_tmp_y.append(disty)
                         n+=1
                     h_dist_x_3.Fill(distx)
                     h_dist_y_3.Fill(disty)
-
-#    c_dist_x_3_tmp = TCanvas()
-#    c_dist_x_3_tmp.cd()
-#    h_dist_x_3.Draw()
-#    c_dist_y_3_tmp = TCanvas()
-#    c_dist_y_3_tmp.cd()
-#    h_dist_y_3.Draw()
-#    a = raw_input()
-#    maxx_bin = h_dist_x_3.GetMaximumBin()
-#    maxx = h_dist_x_3.GetXaxis().GetBinCenter(maxx_bin)
-##     print'maxx: %f'%maxx
-#    maxy_bin = h_dist_y_3.GetMaximumBin()
-#    maxy = h_dist_y_3.GetXaxis().GetBinCenter(maxy_bin)
-##    Translations[0]=maxx
-#    Translations[1]=maxy   
-    
-    
-#     print'maxy: %f'%maxy
-#
-#
-#    cut2 = cut**2
-#
-#    for index,eventx in enumerate(dist_tmp_x) :
-#        eventy = dist_tmp_y[index]
-#        if((eventx-maxx)**2 + (eventy-maxy)**2 < cut2) :
-#            dist_good_x.append(eventx-maxx)
-#            dist_good_y.append(eventy-maxy)
-#            n+=1
 
 
     result=sqrt(rms(dist_tmp_x)**2 + rms(dist_tmp_x)**2)/n
@@ -851,7 +804,7 @@ def ReadAlignment(filename) :
     return alignments
 
 
-def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,Rotations=[0,0,0]):
+def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,Rotations=[0,0,0]):
     # will plot the x and y distance between every cluster-track pair in an event
     # returns the central values of the x, y bins with the most entries, and hists
 
@@ -889,7 +842,7 @@ def PerformPreAlignement(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,
     f.close()
 
     print "Prealignment yield Translations : %.9f %.9f  [mm]  Rotation : %f %f %f [deg] "%(maxx,maxy,Rotations[0],Rotations[1],Rotations[2])
-    print "Time for Prealignement : %f s"%(time.time()-last_time)
+    print "Time for Prealignment : %f s"%(time.time()-last_time)
 
     return [[Rotations[0],Rotations[1],Rotations[2],maxx,maxy]], h_dist_x, h_dist_y
 
@@ -901,7 +854,7 @@ def PerformAlignement(aDataSet, boundary) :
     return res.x[0:3],res.x[3:]
 
 
-def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,step=0.05,Rotations=[0,0,0]) :
+def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,Rotations=[0,0,0]) :
     x_tx = np.array([0.])
     x_ty = np.array([0.])
     xr= np.array(Rotations)
@@ -1015,7 +968,7 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
 
     return ressigmachargeX.x ,ressigmachargeY.x
 
-def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignement.txt") :
+def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :
 
     print "Applying Alignment with  Rotation : %0.10f %0.10f %0.10f [deg] Trans : %0.10f %0.10f  [mm]"%(rotations[0],rotations[1],rotations[2],translations[0],translations[1])
     RotMat = RotationMatrix(rotations)

@@ -167,8 +167,6 @@ if len(aDataSet.AllTracks)< n_proc :
     n_proc=len(aDataSet.AllTracks)
 
 
-scaler = 1
-
 print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
 
 
@@ -306,14 +304,6 @@ if (method_name == "EtaCorrection") :
     ApplyEtaCorrection(aDataSet,ressigmachargeX,ressigmachargeY)
 
 
-resX = TH1D("resX","Unbiased residual X",600,-0.150,0.150)
-resY = TH1D("resY","Unbiased residual Y",600,-0.150,0.150)
-resX.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
-resX.GetYaxis().SetTitle("Number of hits")
-resY.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-resY.GetYaxis().SetTitle("Number of hits")
-
-
 relX_vs_relY = TH2D("relX_vs_relY","Hit probability in local coordinates",300,0.,15.,300,0.,15.)
 relX_vs_relY.GetXaxis().SetRangeUser(-0.,14.08)
 relX_vs_relY.GetXaxis().SetTitle("Cluster relX position within pixel [mm]")
@@ -329,8 +319,6 @@ HitProb_1_correlationY,HitProb_2_correlationY,HitProb_3_correlationY,HitProb_4_c
 TOTProfileX_1_cluster_binning1m,TOTProfileX_2_cluster_binning1m,TOTProfileX_3_cluster_binning1m,TOTProfileX_4_cluster_binning1m,TOTProfileY_1_cluster_binning1m,TOTProfileY_2_cluster_binning1m,TOTProfileY_3_cluster_binning1m,TOTProfileY_4_cluster_binning1m,TOTProfileX,TOTProfileY,TOTProfile = TOTProfile(aDataSet,55,6)
 
 
-h1_style(resX,1)
-h1_style(resY,1)
 h1_style(HitProb_1_cluster_binning1m)
 h1_style(HitProb_2_cluster_binning1m)
 h1_style(HitProb_3_cluster_binning1m)
@@ -377,54 +365,6 @@ h1_style(QrelWrtMindistance)
 canEtaCorr.SaveAs("%s/Run%i/%s/Eta_hist.pdf"%(PlotPath,RunNumber,method_name))
 
 
-resX_cs = []
-resY_cs = []
-
-resX_s2x2y2 = TH1D("resX_s2x2y2","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.600,0.600)
-resY_s2x2y2 = TH1D("resY_s2x2y2","Unbiased residual Y, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.600,0.600)
-resX_s2x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
-resX_s2x2y2.GetYaxis().SetTitle("Number of hits")
-resY_s2x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-resY_s2x2y2.GetYaxis().SetTitle("Number of hits")
-
-resX_s2x2y1 = TH1D("resX_s2x2y1","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 1",600,-0.600,0.600)
-resY_s2x2y1 = TH1D("resY_s2x2y1","Unbiased residual Y, cluster size = 2, sizeX = 2 and sizeY = 1",600,-0.600,0.600)
-resX_s2x2y1.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
-resX_s2x2y1.GetYaxis().SetTitle("Number of hits")
-resY_s2x2y1.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-resY_s2x2y1.GetYaxis().SetTitle("Number of hits")
-
-resX_s2x1y2 = TH1D("resX_s2x1y2","Unbiased residual X, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.600,0.600)
-resY_s2x1y2 = TH1D("resY_s2x1y2","Unbiased residual Y, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.600,0.600)
-resX_s2x1y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
-resX_s2x1y2.GetYaxis().SetTitle("Number of hits")
-resY_s2x1y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-resY_s2x1y2.GetYaxis().SetTitle("Number of hits")
-
-resX_s4x2y2 = TH1D("resX_s4x2y2","Unbiased residual X, cluster size = 4, sizeX = 2 and sizeY = 2",600,-0.600,0.600)
-resY_s4x2y2 = TH1D("resY_s4x2y2","Unbiased residual Y, cluster size = 4, sizeX = 2 and sizeY = 2",600,-0.600,0.600)
-resX_s4x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
-resX_s4x2y2.GetYaxis().SetTitle("Number of hits")
-resY_s4x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-resY_s4x2y2.GetYaxis().SetTitle("Number of hits")
-
-n_cs = 2
-
-for i in range(1,n_cs+2) : #n_cs+2 excluded
-    tmpx = TH1D("resX_%i"%i,"Unbiased residual X, cluster size X = %i"%i,600,-0.600,0.600)
-    tmpy = TH1D("resY_%i"%i,"Unbiased residual Y, cluster size Y = %i"%i,600,-0.600,0.600)
-    tmpx.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
-    tmpx.GetYaxis().SetTitle("Number of hits")
-    tmpy.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
-    tmpy.GetYaxis().SetTitle("Number of hits")
-    tmpx.SetLineColor(i)
-    tmpy.SetLineColor(i)
-    tmpx.Sumw2()
-    tmpy.Sumw2()
-    resX_cs.append(tmpx)
-    resY_cs.append(tmpy)
-
-
 last_time = time.time()
 
 allTOT = TH1D("allTOT","TOT spectrum, all cluster sizes",5000,0,5000)
@@ -437,6 +377,54 @@ TOT3.SetLineColor(3)
 TOT4 = TH1D("TOT4","TOT spectrum, cluster size = 4",5000,0,5000)
 TOT4.SetLineColor(4)
 
+resX = TH1D("resX","Unbiased residual X, all clusters",600,-0.150,0.150)
+resY = TH1D("resY","Unbiased residual Y, all clusters",600,-0.150,0.150)
+resX.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX,1)
+h1_style(resY,1)
+
+resX_s1x1y1 = TH1D("resX_s1x1y1","Unbiased residual X, cluster size = 1, sizeX = 1 and sizeY = 1",600,-0.150,0.150)
+resY_s1x1y1 = TH1D("resY_s1x1y1","Unbiased residual Y, cluster size = 1, sizeX = 1 and sizeY = 1",600,-0.150,0.150)
+resX_s1x1y1.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY_s1x1y1.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX_s1x1y1,1)
+h1_style(resY_s1x1y1,1)
+
+resX_s2x2y1 = TH1D("resX_s2x2y1","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 1",600,-0.150,0.150)
+resY_s2x2y1 = TH1D("resY_s2x2y1","Unbiased residual Y, cluster size = 2, sizeX = 2 and sizeY = 1",600,-0.150,0.150)
+resX_s2x2y1.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY_s2x2y1.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX_s2x2y1,1)
+h1_style(resY_s2x2y1,1)
+
+resX_s2x1y2 = TH1D("resX_s2x1y2","Unbiased residual X, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
+resY_s2x1y2 = TH1D("resY_s2x1y2","Unbiased residual Y, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
+resX_s2x1y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY_s2x1y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX_s2x1y2,1)
+h1_style(resY_s2x1y2,1)
+
+resX_s2x2y2 = TH1D("resX_s2x2y2","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
+resY_s2x2y2 = TH1D("resY_s2x2y2","Unbiased residual Y, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
+resX_s2x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY_s2x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX_s2x2y2,1)
+h1_style(resY_s2x2y2,1)
+
+resX_s3x2y2 = TH1D("resX_s3x2y2","Unbiased residual X, cluster size = 3, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
+resY_s3x2y2 = TH1D("resY_s3x2y2","Unbiased residual Y, cluster size = 3, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
+resX_s3x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY_s3x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX_s3x2y2,1)
+h1_style(resY_s3x2y2,1)
+
+resX_s4x2y2 = TH1D("resX_s4x2y2","Unbiased residual X, cluster size = 4, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
+resY_s4x2y2 = TH1D("resY_s4x2y2","Unbiased residual Y, cluster size = 4, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
+resX_s4x2y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+resY_s4x2y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resX_s4x2y2,1)
+h1_style(resY_s4x2y2,1)
 
 for j,tracks in enumerate(aDataSet.AllTracks) :
     for track in tracks :
@@ -446,7 +434,10 @@ for j,tracks in enumerate(aDataSet.AllTracks) :
             relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
             resX.Fill(aCluster.resX)
             resY.Fill(aCluster.resY)
-            if(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
+            if (aCluster.size==1 and (aCluster.sizeX==1 and aCluster.sizeY==1)) :
+                resX_s1x1y1.Fill(aCluster.resX)
+                resY_s1x1y1.Fill(aCluster.resY)
+            elif(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
                 resX_s2x2y2.Fill(aCluster.resX)
                 resY_s2x2y2.Fill(aCluster.resY)
             elif(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==1)) :
@@ -455,15 +446,13 @@ for j,tracks in enumerate(aDataSet.AllTracks) :
             elif(aCluster.size==2 and (aCluster.sizeX==1 and aCluster.sizeY==2)) :
                 resX_s2x1y2.Fill(aCluster.resX)
                 resY_s2x1y2.Fill(aCluster.resY)
+            elif(aCluster.size==3 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
+                resX_s3x2y2.Fill(aCluster.resX)
+                resY_s3x2y2.Fill(aCluster.resY)
             elif(aCluster.size==4 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
                 resX_s4x2y2.Fill(aCluster.resX)
                 resY_s4x2y2.Fill(aCluster.resY)
 
-            for i in range(1,n_cs+2) :
-                if(aCluster.sizeX==i) :
-                    resX_cs[i-1].Fill(aCluster.resX)
-                if(aCluster.sizeY==i) :
-                    resY_cs[i-1].Fill(aCluster.resY)
             if(aCluster.size==1) :
                 TOT1.Fill(aCluster.totalTOT)
             if(aCluster.size==2) :
@@ -474,6 +463,25 @@ for j,tracks in enumerate(aDataSet.AllTracks) :
                 TOT4.Fill(aCluster.totalTOT)
 print "Elapsed time for Residual, cluster and TOT plots: %f s"%(time.time()-last_time)
 
+can3 = TCanvas()
+resX.Draw("")
+resX.Fit("gaus","R","",-0.03,0.03)
+can3.SaveAs("%s/Run%i/%s/resX.pdf"%(PlotPath,RunNumber,method_name))
+
+can4 = TCanvas()
+resY.Draw("")
+resY.Fit("gaus","R","",-0.03,0.03)
+can4.SaveAs("%s/Run%i/%s/resY.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resX_s1x1y1 = TCanvas()
+resX_s1x1y1.Draw()
+resX_s1x1y1.Fit("gaus","R","",-0.03,0.03)
+canvas_resX_s1x1y1.SaveAs("%s/Run%i/%s/resX_s1x1y1.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resY_s1x1y1 = TCanvas()
+resY_s1x1y1.Draw()
+resY_s1x1y1.Fit("gaus","R","",-0.03,0.03)
+canvas_resY_s1x1y1.SaveAs("%s/Run%i/%s/resY_s1x1y1.pdf"%(PlotPath,RunNumber,method_name))
 
 canvas_resX_s2x2y2 = TCanvas()
 resX_s2x2y2.Draw()
@@ -505,6 +513,16 @@ resY_s2x1y2.Draw()
 resY_s2x1y2.Fit("gaus","R","",-0.03,0.03)
 canvas_resY_s2x1y2.SaveAs("%s/Run%i/%s/resY_s2x1y2.pdf"%(PlotPath,RunNumber,method_name))
 
+canvas_resX_s3x2y2 = TCanvas()
+resX_s3x2y2.Draw()
+resX_s3x2y2.Fit("gaus","R","",-0.03,0.03)
+canvas_resX_s3x2y2.SaveAs("%s/Run%i/%s/resX_s3x2y2.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resY_s3x2y2 = TCanvas()
+resY_s3x2y2.Draw()
+resY_s3x2y2.Fit("gaus","R","",-0.03,0.03)
+canvas_resY_s3x2y2.SaveAs("%s/Run%i/%s/resY_s3x2y2.pdf"%(PlotPath,RunNumber,method_name))
+
 canvas_resX_s4x2y2 = TCanvas()
 resX_s4x2y2.Draw()
 resX_s4x2y2.Fit("gaus","R","",-0.03,0.03)
@@ -513,7 +531,7 @@ canvas_resX_s4x2y2.SaveAs("%s/Run%i/%s/resX_s4x2y2.pdf"%(PlotPath,RunNumber,meth
 canvas_resY_s4x2y2 = TCanvas()
 resY_s4x2y2.Draw()
 resY_s4x2y2.Fit("gaus","R","",-0.03,0.03)
-canvas_resY_s4x2y2.SaveAs("%s/Run%i/%s/resY_s4x2y2.png"%(PlotPath,RunNumber,method_name))
+canvas_resY_s4x2y2.SaveAs("%s/Run%i/%s/resY_s4x2y2.pdf"%(PlotPath,RunNumber,method_name))
 
 can1 = TCanvas()
 h1_style(allTOT,1)
@@ -711,122 +729,6 @@ leg2.Draw("SAME")
 TOT1.SetTitle("Tot spectrum")
 can2.SaveAs("%s/Run%i/%s/TOTnormalized.pdf"%(PlotPath,RunNumber,method_name))
 
-
-can3 = TCanvas()
-resX.Draw("")
-resX.Fit("gaus","R","",-0.03,0.03)
-can3.SaveAs("%s/Run%i/%s/resX.pdf"%(PlotPath,RunNumber,method_name))
-
-can4 = TCanvas()
-resY.Draw("")
-resY.Fit("gaus","R","",-0.03,0.03)
-can4.SaveAs("%s/Run%i/%s/resY.pdf"%(PlotPath,RunNumber,method_name))
-
-can5 = TCanvas()
-for i in range(1,n_cs+2) :
-    h1_style(resX_cs[i-1],1)
-    if(resX_cs[i-1].Integral()!=0) :
-        resX_cs[i-1].Scale(1./(resX_cs[i-1].Integral()))
-    if i==1 :
-        resX_cs[i-1].Draw("")
-    else :
-        resX_cs[i-1].Draw("sames")
-
-res_max = []
-for h in resX_cs[0:2] :
-    res_max.append(h.GetMaximum())
-resX_cs[0].GetYaxis().SetRangeUser(0,max(res_max)*1.1)
-gPad.Update()
-
-st_resX_cs0 = resX_cs[0].FindObject("stats")
-st_resX_cs0.SetX1NDC(0.690)
-st_resX_cs0.SetY1NDC(0.623)
-st_resX_cs0.SetX2NDC(0.838)
-st_resX_cs0.SetY2NDC(0.879)
-st_resX_cs0.SetOptStat(111111)
-st_resX_cs1 = resX_cs[1].FindObject("stats")
-st_resX_cs1.SetX1NDC(0.846)
-st_resX_cs1.SetY1NDC(0.623)
-st_resX_cs1.SetX2NDC(0.984)
-st_resX_cs1.SetY2NDC(0.879)
-st_resX_cs1.SetOptStat(111111)
-st_resX_cs2 = resX_cs[2].FindObject("stats")
-st_resX_cs2.SetX1NDC(0.690)
-st_resX_cs2.SetY1NDC(0.360)
-st_resX_cs2.SetX2NDC(0.838)
-st_resX_cs2.SetY2NDC(0.616)
-st_resX_cs2.SetOptStat(111111)
-#st_resX_cs3 = resX_cs[3].FindObject("stats") # could add but need to change n_cs to 3. 
-#st_resX_cs3.SetX1NDC(0.846)
-#st_resX_cs3.SetY1NDC(0.360)
-#st_resX_cs3.SetX2NDC(0.984)
-#st_resX_cs3.SetY2NDC(0.616)
-#st_resX_cs3.SetOptStat(111111)
-leg5 = TLegend(0.13,0.69,0.33,0.88)
-leg5.SetBorderSize(0)
-leg5.AddEntry(resX_cs[0],"cluster size 1","l")
-leg5.AddEntry(resX_cs[1],"cluster size 2","l")
-leg5.AddEntry(resX_cs[2],"cluster size 3","l")
-#leg5.AddEntry(resX_cs[3],"cluster size 4","l")
-leg5.SetFillColor(0)
-leg5.SetFillStyle(0)
-leg5.Draw("SAME")
-can5.SaveAs("%s/Run%i/%s/resX_cs.pdf"%(PlotPath,RunNumber,method_name))
-
-can6 = TCanvas()
-
-for i in range(1,n_cs+2) :
-    h1_style(resY_cs[i-1],1)
-    if(resY_cs[i-1].Integral()!=0) :
-        resY_cs[i-1].Scale(1./(resY_cs[i-1].Integral()))
-    if i==1 :
-        resY_cs[i-1].Draw("")
-    else :
-        resY_cs[i-1].Draw("sames")
-
-res_max = []
-for h in resY_cs[0:2] :
-    res_max.append(h.GetMaximum())
-resY_cs[0].GetYaxis().SetRangeUser(0,max(res_max)*1.1)
-
-
-gPad.Update()
-st_resY_cs0 = resY_cs[0].FindObject("stats")
-st_resY_cs0.SetX1NDC(0.690)
-st_resY_cs0.SetY1NDC(0.623)
-st_resY_cs0.SetX2NDC(0.838)
-st_resY_cs0.SetY2NDC(0.879)
-st_resY_cs0.SetOptStat(111111)
-st_resY_cs1 = resY_cs[1].FindObject("stats")
-st_resY_cs1.SetX1NDC(0.846)
-st_resY_cs1.SetY1NDC(0.623)
-st_resY_cs1.SetX2NDC(0.984)
-st_resY_cs1.SetY2NDC(0.879)
-st_resY_cs1.SetOptStat(111111)
-st_resY_cs2 = resY_cs[2].FindObject("stats")
-st_resY_cs2.SetX1NDC(0.690)
-st_resY_cs2.SetY1NDC(0.360)
-st_resY_cs2.SetX2NDC(0.838)
-st_resY_cs2.SetY2NDC(0.616)
-st_resY_cs2.SetOptStat(111111)
-#st_resY_cs3 = resY_cs[3].FindObject("stats")
-#st_resY_cs3.SetX1NDC(0.846)
-#st_resY_cs3.SetY1NDC(0.360)
-#st_resY_cs3.SetX2NDC(0.984)
-#st_resY_cs3.SetY2NDC(0.616)
-#st_resY_cs3.SetOptStat(111111)
-leg6 = TLegend(0.13,0.69,0.33,0.88)
-leg6.SetBorderSize(0)
-leg6.AddEntry(resY_cs[0],"cluster size 1","l")
-leg6.AddEntry(resY_cs[1],"cluster size 2","l")
-leg6.AddEntry(resY_cs[2],"cluster size 3","l")
-#leg6.AddEntry(resY_cs[3],"cluster size 4","l")
-leg6.SetFillColor(0)
-leg6.SetFillStyle(0)
-leg6.Draw("SAME")
-can6.SaveAs("%s/Run%i/%s/resY_cs.pdf"%(PlotPath,RunNumber,method_name))
-
-
 can7 = TCanvas()
 SquareCanvas(can7)
 HitProb_1_cluster_binning1m.Draw("colz")
@@ -1016,27 +918,6 @@ TOTProfile.Draw("colz")
 SquareCanvas(can40)
 can40.SaveAs("%s/Run%i/%s/TOTProfile.pdf"%(PlotPath,RunNumber,method_name))
 
-can_resX_cs_0 = TCanvas()
-resX_cs[0].Draw()
-r0 = resX_cs[0].Fit("gaus","","")
-can_resX_cs_0.SaveAs("%s/Run%i/%s/resX_cs_0_fit.pdf"%(PlotPath,RunNumber,method_name))
-
-can_resY_cs_0 = TCanvas()
-resY_cs[0].Draw()
-r0 = resY_cs[0].Fit("gaus","","")
-can_resY_cs_0.SaveAs("%s/Run%i/%s/resY_cs_0_fit.pdf"%(PlotPath,RunNumber,method_name))
-
-can_resX_cs_1 = TCanvas()
-resX_cs[1].Draw()
-r0 = resX_cs[1].Fit("gaus","","")
-can_resX_cs_1.SaveAs("%s/Run%i/%s/resX_cs_1_fit.pdf"%(PlotPath,RunNumber,method_name))
-
-can_resY_cs_1 = TCanvas()
-resY_cs[1].Draw()
-r0 = resY_cs[1].Fit("gaus","","")
-can_resY_cs_1.SaveAs("%s/Run%i/%s/resY_cs_1_fit.pdf"%(PlotPath,RunNumber,method_name))
-
-
 # Write all histograms to output root file
 out = TFile("%s/Run%i/%s/output_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
@@ -1061,12 +942,16 @@ hClusterSizeCounter_percent.Write()
 hx.Write()
 hy.Write()
 QrelWrtMindistance.Write()
+resX_s1x1y1.Write()
+resY_s1x1y1.Write()
 resX_s2x2y2.Write()
 resY_s2x2y2.Write()
 resX_s2x1y2.Write()
 resY_s2x1y2.Write()
 resX_s2x2y1.Write()
 resY_s2x2y1.Write()
+resX_s3x2y2.Write()
+resY_s3x2y2.Write()
 resX_s4x2y2.Write()
 resY_s4x2y2.Write()
 allTOT.Write()
@@ -1076,9 +961,6 @@ TOT3.Write()
 TOT4.Write()
 resX.Write()
 resY.Write()
-for i in range(1,n_cs+2) :
-    resX_cs[i-1].Write()
-    resY_cs[i-1].Write()
 HitProb_1_cluster_binning1m.Write()
 HitProb_2_cluster_binning1m.Write()
 HitProb_3_cluster_binning1m.Write()

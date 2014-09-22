@@ -799,7 +799,7 @@ class EudetData:
 
 
 
-    def ClusterEvent(self,i,method="QWeighted",sigma=0.003, scaler=1):
+    def ClusterEvent(self,i,method="QWeighted",sigma=0.003):
 
         self.getEvent(i)
 
@@ -851,8 +851,7 @@ class EudetData:
             cluster=0
 
 	
-	for ind in range(i,i+scaler):
-            self.AllClusters.append(clusters)
+        self.AllClusters.append(clusters)
         del clusters
 
 
