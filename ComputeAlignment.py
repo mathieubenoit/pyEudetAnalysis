@@ -161,6 +161,8 @@ histo_freq.Draw("")
 prev_pixel_xhits = []
 last_time=time.time()
 
+clusters_tmp = []
+
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
 
@@ -170,7 +172,7 @@ for i in range(0,n_proc) :
     for k in xrange(npixels_hit):
         pixel_x_hits.append(aDataSet.p_col[k])
 
-    if ((pixel_x_hits == prev_pixel_xhits) and len(pixel_x_hits)!=0):
+    if (pixel_x_hits == prev_pixel_xhits ):
         # same pixel map as before, will add clusters already computed
         aDataSet.AllClusters.append(clusters_tmp)
     else:
