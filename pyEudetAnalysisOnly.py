@@ -5,6 +5,7 @@
 
 import time,os
 from optparse import OptionParser
+import future_builtins
 
 parser = OptionParser()
 
@@ -28,6 +29,9 @@ parser.add_option("-a", "--alignment",
 
 parser.add_option("-e", "--edge",
                   help="edge width", dest="EDGE", default=0.0, type="float")
+
+parser.add_option("-s", "--sensor",
+                  help="Sensor type", dest="SENSOR", default="Timepix")
 
 (options, args) = parser.parse_args()
 
@@ -84,7 +88,15 @@ else :
     parser.print_help()
     exit()
 
-
+future_builtins.SensorType= "Timepix"
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+    future_builtins.SensorType=options.SENSOR
+else :
+    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
+    parser.print_help()
+    exit()
+    
+    
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
 
@@ -211,9 +223,21 @@ n_matched_in_main = 0
 n_matched_in_edge = 0
 last_time = time.time()
 
+
+#etasx,etasy=FindSigmaMin(aDataSet,5000)
+
+if (method_name == "EtaCorrection") :
+    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
+    print "ressigmachargeX : %f"%float(ressigmachargeX)
+    print "ressigmachargeY : %f"%float(ressigmachargeY)
+
+else: 
+    etasx=0.01
+    etasy=0.01
+
 for i in range(n_proc-1) :
     aDataSet.FindMatchedCluster(i,0.1,6)
-    aDataSet.ComputePosition(i,method_name,0.003)
+    aDataSet.ComputePosition(i,method_name,(etasx+etasy)/2.0)
     m,me = aDataSet.ComputeResiduals(i)
     n_matched_in_main += m
     n_matched_in_edge += me
@@ -292,13 +316,6 @@ hy.Draw("colz")
 cancory.SaveAs("%s/Run%i/%s/cory.pdf"%(PlotPath,RunNumber,method_name))
 
 
-
-if (method_name == "EtaCorrection") :
-    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
-    print "ressigmachargeX : %f"%float(ressigmachargeX)
-    print "ressigmachargeY : %f"%float(ressigmachargeY)
-
-    ApplyEtaCorrection(aDataSet,ressigmachargeX,ressigmachargeY)
 
 
 relX_vs_relY = TH2D("relX_vs_relY","Hit probability in local coordinates",300,0.,15.,300,0.,15.)

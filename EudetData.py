@@ -267,7 +267,22 @@ class EudetData:
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
-
+ 
+ 
+    def PlotFrame(self,i,plot,n_pix_min=1) : 
+        
+	plot = TH2D("frame %i"%i,"frame %i"%i,npix_X,0,npix_X,npix_Y,0,npix_Y)
+	self.getEvent(i)
+	
+	if(len(self.p_col)>n_pix_min):
+	    for i,X in enumerate(self.p_col) : 
+	    	 plot.Fill(self.p_col[i],self.p_row[i],self.p_tot[i])
+	
+	    plot.Draw("colz")
+	    print "press enter for next frame"
+	    a=raw_input()
+	else : 
+	    print "Skipping event %i, empty"%i
 
     def WriteReconstructedData(self,filename,dut=6) :
         outfile = TFile(filename,'recreate')
@@ -502,14 +517,20 @@ class EudetData:
 
     def IsInEdges(self,track,dut=6):
         is_in = False
-        if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
+        
+	if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
             is_in = True
             if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
                 is_in=False
         return is_in
 
 
-
+    def IsInGoodRegion(self,track,dut=6) : 
+    
+        if (track.trackX[track.iden.index(dut)]>=((pitchX*npix_X)/2-4*pitchX) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.)) :
+ 	    return true
+	else : 
+	    return false
 
     def ComputeResiduals(self,i,dut=6) :
 
@@ -525,7 +546,7 @@ class EudetData:
 
                         if(self.IsInEdges(track)):
                             nmatch_in_edge += 1.
-                        else:
+                        else :
                             nmatch_in_main += 1.
 
         return nmatch_in_main, nmatch_in_edge
@@ -654,8 +675,11 @@ class EudetData:
         # clusters are matched to tracks using GetPixelResiduals
         # r_max: maximum radial distance allowed between track and any pixel of the cluster
 
-        clusters_tmp = self.AllClusters[i]
-        matched_clusters = []
+        try : 
+		clusters_tmp = self.AllClusters[i]
+        except: 
+		clusters_tmp = []
+	matched_clusters = []
         good_count = 0
 
         for track in self.AllTracks[i] :
@@ -695,7 +719,8 @@ class EudetData:
 
 
         if(filter_cluster) :
-            self.AllClusters[i] = matched_clusters
+            if(i<len(self.AllClusters)):
+	    	self.AllClusters[i] = matched_clusters
         else :
             self.AllClusters[i] = clusters_tmp
 
@@ -786,16 +811,18 @@ class EudetData:
 
     def ComputePosition(self,i,method="QWeighted",sigma=0.003):
 
-        for cluster in self.AllClusters[i] :
-            cluster.Statistics()
-            if (method=="QWeighted"):
-                cluster.GetQWeightedCentroid()
-            elif (method=="DigitalCentroid"):
-                cluster.GetDigitalCentroid()
-            elif (method=="maxTOT"):
-                cluster.GetMaxTOTCentroid()
-            elif (method=="EtaCorrection"):
-                cluster.GetEtaCorrectedQWeightedCentroid(sigma)
+        
+	if(i<len(self.AllClusters)):
+    	    for cluster in self.AllClusters[i] :
+                cluster.Statistics()
+                if (method=="QWeighted"):
+                    cluster.GetQWeightedCentroid()
+                elif (method=="DigitalCentroid"):
+                    cluster.GetDigitalCentroid()
+                elif (method=="maxTOT"):
+                    cluster.GetMaxTOTCentroid()
+                elif (method=="EtaCorrection"):
+                    cluster.GetEtaCorrectedQWeightedCentroid(sigma)
 
 
 

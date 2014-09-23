@@ -6,6 +6,7 @@
 from math import fsum
 import time,os
 from optparse import OptionParser
+import future_builtins
 
 parser = OptionParser()
 parser.add_option("-r", "--run",
@@ -28,6 +29,11 @@ parser.add_option("-a", "--alignment",
 
 parser.add_option("-e", "--edge",
                   help="Edge width", dest="EDGE", default=0.0, type="float")
+
+
+parser.add_option("-s", "--sensor",
+                  help="Sensor type", dest="SENSOR", default="Timepix")
+
 
 (options, args) = parser.parse_args()
 
@@ -83,6 +89,17 @@ else :
     print "The file name will be created to include run, method, nevents, skip"
     parser.print_help()
     exit()
+
+future_builtins.SensorType= "Timepix"
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+    future_builtins.SensorType=options.SENSOR
+else :
+    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
+    parser.print_help()
+    exit()
+
+
+
 
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
@@ -144,6 +161,8 @@ histo_freq.Draw("")
 prev_pixel_xhits = []
 last_time=time.time()
 
+clusters_tmp = []
+
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
 
@@ -153,7 +172,7 @@ for i in range(0,n_proc) :
     for k in xrange(npixels_hit):
         pixel_x_hits.append(aDataSet.p_col[k])
 
-    if (pixel_x_hits == prev_pixel_xhits):
+    if (pixel_x_hits == prev_pixel_xhits ):
         # same pixel map as before, will add clusters already computed
         aDataSet.AllClusters.append(clusters_tmp)
     else:
@@ -180,18 +199,24 @@ cantccory1 = TCanvas()
 tccory1.Draw("colz")
 
 print "Press any key to continue, ctrl-D to stop"
-bla = raw_input()
+#bla = raw_input()
 
 
 print "Performing prealignment"
-alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
+
+if future_builtins.SensorType=="Timepix3" or future_builtins.SensorType=="CLICpix": 
+	"print adding 180 degree rotation around Z for Timepix3 and CLICpix data, please fix this if this is not what is wanted"
+	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
+else :
+	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
+
 canprealix = TCanvas()
 prealix.Draw()
 canprealiy = TCanvas()
 prealiy.Draw()
 
 print "Press any key to continue, ctrl-D to stop"
-b=raw_input() 
+#b=raw_input() 
 
 last_time = time.time()
 

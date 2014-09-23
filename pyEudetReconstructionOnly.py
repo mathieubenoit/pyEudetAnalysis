@@ -5,6 +5,8 @@
 
 import time,os
 from optparse import OptionParser
+import future_builtins
+
 
 parser = OptionParser()
 
@@ -28,6 +30,9 @@ parser.add_option("-a", "--alignment",
 
 parser.add_option("-e", "--edge",
                   help="edge width", dest="EDGE", default=0.0, type="float")
+
+parser.add_option("-s", "--sensor",
+                  help="Sensor type : Timepix, Timepix3 or CLICpix", dest="SENSOR", default="Timepix")
 
 (options, args) = parser.parse_args()
 
@@ -83,7 +88,15 @@ else :
     parser.print_help()
     exit()
 
-
+future_builtins.SensorType= "Timepix"
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+    future_builtins.SensorType=options.SENSOR
+else :
+    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
+    parser.print_help()
+    exit()
+    
+    
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
 
