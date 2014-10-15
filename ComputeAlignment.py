@@ -30,7 +30,6 @@ parser.add_option("-a", "--alignment",
 parser.add_option("-e", "--edge",
                   help="Edge width", dest="EDGE", default=0.0, type="float")
 
-
 parser.add_option("-s", "--sensor",
                   help="Sensor type", dest="SENSOR", default="Timepix")
 
@@ -90,7 +89,6 @@ else :
     parser.print_help()
     exit()
 
-future_builtins.SensorType= "Timepix"
 if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
     future_builtins.SensorType=options.SENSOR
 else :
@@ -198,25 +196,19 @@ tccorx1.Draw("colz")
 cantccory1 = TCanvas()
 tccory1.Draw("colz")
 
-print "Press any key to continue, ctrl-D to stop"
-#bla = raw_input()
-
-
 print "Performing prealignment"
 
 if future_builtins.SensorType=="Timepix3" or future_builtins.SensorType=="CLICpix": 
-	"print adding 180 degree rotation around Z for Timepix3 and CLICpix data, please fix this if this is not what is wanted"
-	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
+    print "WARNING adding 180 degree rotation around Z for Timepix3 and CLICpix data"
+    print "WARNING please fix this if this is not what is wanted"
+    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
 else :
-	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
+    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
 
 canprealix = TCanvas()
 prealix.Draw()
 canprealiy = TCanvas()
 prealiy.Draw()
-
-print "Press any key to continue, ctrl-D to stop"
-#b=raw_input() 
 
 last_time = time.time()
 

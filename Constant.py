@@ -15,7 +15,7 @@ if "Timepix" in SensorType :
     npix_X = 256
     npix_Y = 256
     
-    print "Using Timepix detector"
+    print "Using Timepix or Timepix3 detector"
     
 
 elif SensorType=="CLICpix" : 
