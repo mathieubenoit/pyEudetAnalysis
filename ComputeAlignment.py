@@ -210,6 +210,8 @@ prealix.Draw()
 canprealiy = TCanvas()
 prealiy.Draw()
 
+distances_histo_afterpreali = TH1F("distances_histo_afterpreali","",100,0.0,1.0)
+
 last_time = time.time()
 
 for i in range(0,n_proc) :
@@ -217,13 +219,17 @@ for i in range(0,n_proc) :
     for alignment in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignment[3],alignment[4],0],[alignment[0],alignment[1],alignment[2]])
 
-    aDataSet.FindMatchedCluster(i,0.3,6)
+    aDataSet.FindMatchedCluster(i,0.3,6,distances_histo_afterpreali)
     a,b=aDataSet.ComputeResiduals(i)
     if i%1000 ==0 :
         print "Event %d"%i
         print "Elapsed time/1000 Event. Apply Alignment and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
+candist = TCanvas()
+candist.SetLogy()
+distances_histo_afterpreali.GetXaxis().SetTitle("Track-cluster distance (mm)")
+distances_histo_afterpreali.Draw()
 
 tccorx2,tccory2 = TrackClusterCorrelation(aDataSet,6,n_proc)
 tccorx2.SetName("tccorx2")
@@ -250,10 +256,11 @@ tccory3.Draw("colz")
 
 
 n_matched = 0
+distances_histo_afterfullali = TH1F("distances_histo_afterfullali","",100,0.0,1.0)
 
 for i in range(0,n_proc) :
 
-    aDataSet.FindMatchedCluster(i,0.3,6)
+    aDataSet.FindMatchedCluster(i,0.3,6,distances_histo_afterfullali)
     a,b=aDataSet.ComputeResiduals(i)
     n_matched+=a
     if i%1000 ==0 :
@@ -261,6 +268,10 @@ for i in range(0,n_proc) :
         print "Elapsed time/1000 Event. Apply Alignment and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
+candist2 = TCanvas()
+candist2.SetLogy()
+distances_histo_afterfullali.GetXaxis().SetTitle("Track-cluster distance (mm)")
+distances_histo_afterfullali.Draw()
       
 # Write all histograms to output root file
 out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
@@ -277,6 +288,7 @@ tccorx3.Write()
 tccory3.Write()
 prealix.Write()
 prealiy.Write()
-
+distances_histo_afterpreali.Write()
+distances_histo_afterfullali.Write()
 print "Found %i matched track-cluster binome"%n_matched
 print "Produced Alignment file %s"%AlignmentPath
