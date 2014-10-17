@@ -273,6 +273,45 @@ candist2.SetLogy()
 distances_histo_afterfullali.GetXaxis().SetTitle("Track-cluster distance (mm)")
 distances_histo_afterfullali.Draw()
       
+resX_hist = TH1F("resX_hist","",100,-0.5,0.5)
+resY_hist = TH1F("resY_hist","",100,-0.5,0.5)
+resX2hit_hist = TH1F("resX2hit_hist","",100,-0.1,0.1)
+resY2hit_hist = TH1F("resY2hit_hist","",100,-0.1,0.1)
+for i,clusters in enumerate(aDataSet.AllClusters[0:n_proc]) :
+    for cluster in clusters :
+        for track in aDataSet.AllTracks[i] :
+            resX_hist.Fill(cluster.absX - track.trackX[track.iden.index(6)])
+            resY_hist.Fill(cluster.absY - track.trackY[track.iden.index(6)])
+            if cluster.size==2:
+                if cluster.sizeX==2 and cluster.sizeY==1:
+                    resX2hit_hist.Fill(cluster.absX - track.trackX[track.iden.index(6)])
+                if cluster.sizeX==1 and cluster.sizeY==2:
+                    resY2hit_hist.Fill(cluster.absY - track.trackY[track.iden.index(6)])
+
+c_resX = TCanvas()
+resX_hist.Fit("gaus")
+resX_hist.Draw()
+c_resX.Update()
+resX = resX_hist.GetListOfFunctions()[0].GetParameter(2)
+
+c_resY = TCanvas()
+resY_hist.Fit("gaus")
+resY_hist.Draw()
+c_resY.Update()
+resY = resY_hist.GetListOfFunctions()[0].GetParameter(2)
+
+c_resX2hit = TCanvas()
+resX2hit_hist.Fit("gaus")
+resX2hit_hist.Draw()
+c_resX2hit.Update()
+resX2hit = resX2hit_hist.GetListOfFunctions()[0].GetParameter(2)
+
+c_resY2hit = TCanvas()
+resY2hit_hist.Fit("gaus")
+resY2hit_hist.Draw()
+c_resY2hit.Update()
+resY2hit = resY2hit_hist.GetListOfFunctions()[0].GetParameter(2)
+
 # Write all histograms to output root file
 out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
@@ -290,5 +329,16 @@ prealix.Write()
 prealiy.Write()
 distances_histo_afterpreali.Write()
 distances_histo_afterfullali.Write()
+resX_hist.Write()
+resY_hist.Write()
+resX2hit_hist.Write()
+resY2hit_hist.Write()
+
 print "Found %i matched track-cluster binome"%n_matched
+print "resX", resX
+print "resY", resY
+print "sqrt(resX**2 + resY**2)", sqrt(resX**2 + resY**2)
+print "resX2hit", resX2hit
+print "resY2hit", resY2hit
+print "sqrt(resX2hit**2 + resY2hit**2)", sqrt(resX2hit**2 + resY2hit**2)
 print "Produced Alignment file %s"%AlignmentPath
