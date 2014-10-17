@@ -616,6 +616,53 @@ def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.1
     return fabs(totaldist_evaluator/n)
 
 
+def TotalRotationFunctionZ(zang,Rotations,Translations,aDataDet,nevents,skip=1,cut=0.1,dut=6):
+    # function to find the best starting Z angle
+    # returns the mertic to be minimised
+
+    n = 0
+    Rotations = np.concatenate((Rotations,zang),axis=0)
+    rotationMatrix = RotationMatrix(Rotations)
+    h_dist_x = TH1D("h_dist_x","TotalRotationFunction: dist_x",100,-0.5,0.5)
+    h_dist_y = TH1D("h_dist_y","TotalRotationFunction: dist_y",100,-0.5,0.5)
+
+    for i,clusters in enumerate(aDataDet.AllClusters[0:nevents]) :
+        for cluster in clusters :
+            if i%skip==0 :
+                for track in aDataDet.AllTracks[i] :
+                    tmp=np.dot(rotationMatrix,[track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)],0])
+                    tmp[0] = tmp[0] + Translations[0]
+                    tmp[1] = tmp[1] + Translations[1]
+                    distx = cluster.absX - tmp[0]
+                    disty = cluster.absY - tmp[1]
+                    if sqrt(distx**2 + disty**2) < cut:
+                        n = n + 1
+
+                    h_dist_x.Fill(distx)
+                    h_dist_y.Fill(disty)
+
+    gx = TF1("gx","gaus",-0.1,0.1)
+    if h_dist_x.GetEffectiveEntries() > 10.:
+        rX = h_dist_x.Fit(gx,"RSQ","")
+        sigmaResX = rX.Parameter(2)
+    else:
+        print "TotalRotationFunctionZ: not enough events to fit"
+        sigmaResX = 9.
+
+    gy = TF1("gy","gaus",-0.1,0.1)
+    if h_dist_y.GetEffectiveEntries() > 10.:
+        rY = h_dist_y.Fit(gy,"RSQ","")
+        sigmaResY = rY.Parameter(2)
+    else:
+        print "TotalRotationFunctionZ: not enough events to fit"
+        sigmaResY = 9.
+
+    result = sqrt(sigmaResX**2 + sigmaResY**2)/n
+    print "Evaluating for Rotation : %.9f %.9f %.9f [deg] Trans : %f %f  [mm] metric = %.9f  n = %i"%(Rotations[0],Rotations[1],Rotations[2],Translations[0],Translations[1],result,n)
+
+    return result
+
+
 def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0.1,dut=6):
 
     n = 0
@@ -860,18 +907,10 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     x_ty = np.array([0.])
     xr= np.array(Rotations)
 
-    sigmas = []
-    rzs = drange(-1,1,0.01)
-    theRs = [x for x in rzs]
-    for rZ in theRs:
-        aSigma=TotalRotationFunction([0,0,rZ],[0,0,0],aDataSet,nevent,skip,cut,dut=6)
-        if (isnan(aSigma) or isinf(aSigma)) : 
-            sigmas.append(1e7)
-        else : 
-            sigmas.append(aSigma)
-  
-    rZ = theRs[sigmas.index(min(sigmas))]
-    
+    x_txang = [0.]
+    argTuple = [0.,0.],[0.,0.],aDataSet,nevent,skip,cut
+    resrx = minimize(TotalRotationFunctionZ,x_txang,argTuple,method='Nelder-Mead',options={'xtol': 1e-6,'disp': True})
+    rZ = resrx.x[0]
     print "Starting guess Z angle : %f"%rZ
       
     xr= np.array([0,0,rZ])
