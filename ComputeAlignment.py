@@ -30,7 +30,6 @@ parser.add_option("-a", "--alignment",
 parser.add_option("-e", "--edge",
                   help="Edge width", dest="EDGE", default=0.0, type="float")
 
-
 parser.add_option("-s", "--sensor",
                   help="Sensor type", dest="SENSOR", default="Timepix")
 
@@ -90,7 +89,6 @@ else :
     parser.print_help()
     exit()
 
-future_builtins.SensorType= "Timepix"
 if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
     future_builtins.SensorType=options.SENSOR
 else :
@@ -198,25 +196,21 @@ tccorx1.Draw("colz")
 cantccory1 = TCanvas()
 tccory1.Draw("colz")
 
-print "Press any key to continue, ctrl-D to stop"
-#bla = raw_input()
-
-
 print "Performing prealignment"
 
 if future_builtins.SensorType=="Timepix3" or future_builtins.SensorType=="CLICpix": 
-	"print adding 180 degree rotation around Z for Timepix3 and CLICpix data, please fix this if this is not what is wanted"
-	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
+    print "WARNING adding 180 degree rotation around Z for Timepix3 and CLICpix data"
+    print "WARNING please fix this if this is not what is wanted"
+    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
 else :
-	alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
+    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
 
 canprealix = TCanvas()
 prealix.Draw()
 canprealiy = TCanvas()
 prealiy.Draw()
 
-print "Press any key to continue, ctrl-D to stop"
-#b=raw_input() 
+distances_histo_afterpreali = TH1F("distances_histo_afterpreali","",100,0.0,1.0)
 
 last_time = time.time()
 
@@ -225,13 +219,17 @@ for i in range(0,n_proc) :
     for alignment in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignment[3],alignment[4],0],[alignment[0],alignment[1],alignment[2]])
 
-    aDataSet.FindMatchedCluster(i,0.3,6)
+    aDataSet.FindMatchedCluster(i,0.3,6,distances_histo_afterpreali)
     a,b=aDataSet.ComputeResiduals(i)
     if i%1000 ==0 :
         print "Event %d"%i
         print "Elapsed time/1000 Event. Apply Alignment and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
+candist = TCanvas()
+candist.SetLogy()
+distances_histo_afterpreali.GetXaxis().SetTitle("Track-cluster distance (mm)")
+distances_histo_afterpreali.Draw()
 
 tccorx2,tccory2 = TrackClusterCorrelation(aDataSet,6,n_proc)
 tccorx2.SetName("tccorx2")
@@ -258,10 +256,11 @@ tccory3.Draw("colz")
 
 
 n_matched = 0
+distances_histo_afterfullali = TH1F("distances_histo_afterfullali","",100,0.0,1.0)
 
 for i in range(0,n_proc) :
 
-    aDataSet.FindMatchedCluster(i,0.3,6)
+    aDataSet.FindMatchedCluster(i,0.3,6,distances_histo_afterfullali)
     a,b=aDataSet.ComputeResiduals(i)
     n_matched+=a
     if i%1000 ==0 :
@@ -269,7 +268,50 @@ for i in range(0,n_proc) :
         print "Elapsed time/1000 Event. Apply Alignment and TrackMatching : %f s"%(time.time()-last_time)
         last_time = time.time()
 
+candist2 = TCanvas()
+candist2.SetLogy()
+distances_histo_afterfullali.GetXaxis().SetTitle("Track-cluster distance (mm)")
+distances_histo_afterfullali.Draw()
       
+resX_hist = TH1F("resX_hist","",100,-0.5,0.5)
+resY_hist = TH1F("resY_hist","",100,-0.5,0.5)
+resX2hit_hist = TH1F("resX2hit_hist","",100,-0.1,0.1)
+resY2hit_hist = TH1F("resY2hit_hist","",100,-0.1,0.1)
+for i,clusters in enumerate(aDataSet.AllClusters[0:n_proc]) :
+    for cluster in clusters :
+        for track in aDataSet.AllTracks[i] :
+            resX_hist.Fill(cluster.absX - track.trackX[track.iden.index(6)])
+            resY_hist.Fill(cluster.absY - track.trackY[track.iden.index(6)])
+            if cluster.size==2:
+                if cluster.sizeX==2 and cluster.sizeY==1:
+                    resX2hit_hist.Fill(cluster.absX - track.trackX[track.iden.index(6)])
+                if cluster.sizeX==1 and cluster.sizeY==2:
+                    resY2hit_hist.Fill(cluster.absY - track.trackY[track.iden.index(6)])
+
+c_resX = TCanvas()
+resX_hist.Fit("gaus")
+resX_hist.Draw()
+c_resX.Update()
+resX = resX_hist.GetListOfFunctions()[0].GetParameter(2)
+
+c_resY = TCanvas()
+resY_hist.Fit("gaus")
+resY_hist.Draw()
+c_resY.Update()
+resY = resY_hist.GetListOfFunctions()[0].GetParameter(2)
+
+c_resX2hit = TCanvas()
+resX2hit_hist.Fit("gaus")
+resX2hit_hist.Draw()
+c_resX2hit.Update()
+resX2hit = resX2hit_hist.GetListOfFunctions()[0].GetParameter(2)
+
+c_resY2hit = TCanvas()
+resY2hit_hist.Fit("gaus")
+resY2hit_hist.Draw()
+c_resY2hit.Update()
+resY2hit = resY2hit_hist.GetListOfFunctions()[0].GetParameter(2)
+
 # Write all histograms to output root file
 out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
@@ -285,6 +327,18 @@ tccorx3.Write()
 tccory3.Write()
 prealix.Write()
 prealiy.Write()
+distances_histo_afterpreali.Write()
+distances_histo_afterfullali.Write()
+resX_hist.Write()
+resY_hist.Write()
+resX2hit_hist.Write()
+resY2hit_hist.Write()
 
 print "Found %i matched track-cluster binome"%n_matched
+print "resX", resX
+print "resY", resY
+print "sqrt(resX**2 + resY**2)", sqrt(resX**2 + resY**2)
+print "resX2hit", resX2hit
+print "resY2hit", resY2hit
+print "sqrt(resX2hit**2 + resY2hit**2)", sqrt(resX2hit**2 + resY2hit**2)
 print "Produced Alignment file %s"%AlignmentPath
