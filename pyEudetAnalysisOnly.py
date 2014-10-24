@@ -109,6 +109,7 @@ from ToolBox import *
 import pyximport; pyximport.install(pyimport=True)
 from EudetData import *
 from array import array
+gROOT.SetBatch(True)
 
 alignment_constants = ReadAlignment(AlignementPath)
 
@@ -171,6 +172,12 @@ can_chi2ndof.SaveAs("%s/Run%i/Chi2nDof_Distribution.pdf"%(PlotPath,RunNumber))
 
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
+
+    if n_proc >= aDataSet.t_nEntries:
+        n_proc = -1
+    if n_proc == -1:
+        n_proc = aDataSet.t_nEntries
+
 else :
     n_proc= aDataSet.t_nEntries
 
@@ -224,20 +231,18 @@ n_matched_in_edge = 0
 last_time = time.time()
 
 
-#etasx,etasy=FindSigmaMin(aDataSet,5000)
-
 if (method_name == "EtaCorrection") :
     ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10)
     print "ressigmachargeX : %f"%float(ressigmachargeX)
     print "ressigmachargeY : %f"%float(ressigmachargeY)
 
 else: 
-    etasx=0.01
-    etasy=0.01
+    ressigmachargeX=0.01
+    ressigmachargeY=0.01
 
 for i in range(n_proc-1) :
     aDataSet.FindMatchedCluster(i,0.1,6)
-    aDataSet.ComputePosition(i,method_name,(etasx+etasy)/2.0)
+    aDataSet.ComputePosition(i,method_name,(ressigmachargeX+ressigmachargeY)/2.0)
     m,me = aDataSet.ComputeResiduals(i)
     n_matched_in_main += m
     n_matched_in_edge += me
