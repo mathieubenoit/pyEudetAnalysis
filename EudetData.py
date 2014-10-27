@@ -822,7 +822,7 @@ class EudetData:
                 elif (method=="maxTOT"):
                     cluster.GetMaxTOTCentroid()
                 elif (method=="EtaCorrection"):
-                    cluster.GetEtaCorrectedQWeightedCentroid(sigma)
+                    cluster.GetEtaCorrectedQWeightedCentroid(sigma,sigma)
 
 
 
