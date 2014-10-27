@@ -992,7 +992,7 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
                 blah = raw_input()
 
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
-    return bestres,bestres
+    return bestsigma,bestsigma
 
 
 def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :
