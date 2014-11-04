@@ -975,7 +975,7 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
     
     bestsigma=1000
     bestres=1000
-    sigmaint_max = 200
+    sigmaint_max = 500
     for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
         

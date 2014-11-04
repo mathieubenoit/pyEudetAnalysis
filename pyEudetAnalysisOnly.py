@@ -109,7 +109,7 @@ from ToolBox import *
 import pyximport; pyximport.install(pyimport=True)
 from EudetData import *
 from array import array
-gROOT.SetBatch(True)
+#gROOT.SetBatch(True)
 
 alignment_constants = ReadAlignment(AlignementPath)
 
@@ -695,6 +695,11 @@ h1_style(TOT1,1)
 h1_style(TOT2,1)
 h1_style(TOT3,1)
 h1_style(TOT4,1)
+
+TOT1.Sumw2()
+TOT2.Sumw2()
+TOT3.Sumw2()
+TOT4.Sumw2()
 
 if ((TOT1.Integral()!=0 and TOT2.Integral()!=0) and (TOT3.Integral()!=0 and TOT4.Integral()!=0)) :
     TOT1.Scale(1./(TOT1.Integral()))
