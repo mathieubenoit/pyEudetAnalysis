@@ -743,10 +743,10 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
 
     g2 = TF1("m1","gaus",-0.03,0.03)
     if tmpx.GetEffectiveEntries() > 10.:
-        rX = tmpx.Fit(g2,"RS","")
+        rX = tmpx.Fit(g2,"RSQ","")
         sigmaResX = rX.Parameter(2)
         sigmaResX_err = rX.ParError(2)
-        print "resolution = %f for sigma=%f"%(sigmaResX,sigmaCharge_tmp_X)
+        #print "resolution = %f for sigma=%f"%(sigmaResX,sigmaCharge_tmp_X)
     else:
         print "not enough events to fit."
         sigmaResX = 9.
@@ -798,10 +798,10 @@ def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
 
     g2 = TF1("m1","gaus",-0.03,0.03)
 
-    rY = tmpy.Fit(g2,"RS","")
+    rY = tmpy.Fit(g2,"RSQ","")
     sigmaResY = rY.Parameter(2)
     sigmaResY_err = rY.ParError(2)
-    print "resolution = %f for sigma=%f"%(sigmaResY,sigmaCharge_tmp_Y)
+    #print "resolution = %f for sigma=%f"%(sigmaResY,sigmaCharge_tmp_Y)
     return sigmaResY
 
 
@@ -973,40 +973,27 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #
 def FindSigmaMin(dataSet,nevent,skip=1) :
     
-    #grX = TGraph(100)
-    #grY = TGraph(100) 
-    
     bestsigma=1000
-    bestres=1000    
-    for sigmaint in range(100) :
+    bestres=1000
+    sigmaint_max = 500
+    for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
-	
-	
-	
+        
     	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip)
     	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip)
 	res=resX/2.0+resY/2.0
-	#grX.SetPoint(sigmaint,sigma,resX)
-	#grY.SetPoint(sigmaint,sigma,resY)
 	
 	if (res < bestres) : 
-		bestres=res
-		bestsigma=sigma
-    #grX.Draw("AL")
-    #grY.Draw("same")
-    print "Best Sigma found at : %f um for resolution : %f um"%(bestsigma*1000,bestres*1000)
-    #blah=raw_input()
-     
-    return bestres,bestres
-     
-     
-	    
-#    xsigmachargeX = np.array([0.005])
-#    xsigmachargeY = np.array([0.005])
-#    ressigmachargeX = minimize(TotalSigmaFunctionX,xsigmachargeX,[xsigmachargeY,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
-#    ressigmachargeY = minimize(TotalSigmaFunctionY,xsigmachargeY,[ressigmachargeX.x,dataSet,skip],method='BFGS',options={'gtol': 1e-5,'disp': True ,'eps': 0.001})
+            bestres=res
+            bestsigma=sigma
+            if sigmaint == (sigmaint_max-1):
+                print "WARNING sigma optimisation hit limit. Adjust limit."
+                print "Press any key to continue, ctrl+D to exit"
+                blah = raw_input()
 
-    return ressigmachargeX.x ,ressigmachargeY.x
+    print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
+    return bestsigma,bestsigma
+
 
 def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :
 
@@ -1158,9 +1145,9 @@ def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath):
     print "Efficiency in total : %f %%"%(efficiency_in_total*100)
 
     f = open("%s/Efficiency.txt"%PlotPath,'w')
-    f.write("Efficiency in main : %f %%"%(efficiency_in_main*100))
-    f.write("Efficiency in edge : %f %%"%(efficiency_in_edge*100))
-    f.write("Efficiency in total : %f %%"%(efficiency_in_total*100))
+    f.write("Efficiency in main : %f %%\n"%(efficiency_in_main*100))
+    f.write("Efficiency in edge : %f %%\n"%(efficiency_in_edge*100))
+    f.write("Efficiency in total : %f %%\n"%(efficiency_in_total*100))
     f.close()
 
 
