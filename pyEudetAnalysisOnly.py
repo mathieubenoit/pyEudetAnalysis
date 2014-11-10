@@ -696,17 +696,6 @@ h1_style(TOT2,1)
 h1_style(TOT3,1)
 h1_style(TOT4,1)
 
-TOT1.Sumw2()
-TOT2.Sumw2()
-TOT3.Sumw2()
-TOT4.Sumw2()
-
-if ((TOT1.Integral()!=0 and TOT2.Integral()!=0) and (TOT3.Integral()!=0 and TOT4.Integral()!=0)) :
-    TOT1.Scale(1./(TOT1.Integral()))
-    TOT2.Scale(1./(TOT2.Integral()))
-    TOT3.Scale(1./(TOT3.Integral()))
-    TOT4.Scale(1./(TOT4.Integral()))
-
 can2=TCanvas()
 can2.cd()
 TOT1.Draw()
