@@ -1,11 +1,12 @@
 # Will process a tbtrack file
-# Will produce an alignment file
+# Will pop out a canvas showing the DUT pixel map
 # For options, run:
-# python ComputeAlignment.py -h
+# python plotFrames.py -h
 
 from math import fsum
 import time,os
 from optparse import OptionParser
+import future_builtins
 
 parser = OptionParser()
 parser.add_option("-r", "--run",
@@ -14,11 +15,18 @@ parser.add_option("-r", "--run",
 parser.add_option("-n", "--nevent",
                   help="Number of events to process", dest="NEVENT")
 
+parser.add_option("-f", "--fevent",
+                  help="First event to process", dest="FEVENT")
+
 parser.add_option("-d", "--data",
                   help="tbtrack Input Folder", dest="INPUT")
 
 parser.add_option("-m", "--minpix",
                   help="minimum pixel in frame for display", dest="NPIX")
+
+parser.add_option("-s", "--sensor",
+                  help="Sensor type", dest="SENSOR", default="Timepix")
+
 (options, args) = parser.parse_args()
 
 if(options.RUN) :
@@ -28,10 +36,10 @@ else :
     parser.print_help()
     exit()  
      
-if(options.RUN) :
-    npix = int(options.NPIX)
+if(options.NPIX) :
+    n_pix_min = int(options.NPIX)
 else :
-    npix=1
+    n_pix_min = 0
        
 if(options.INPUT):
     input_folder=options.INPUT
@@ -40,7 +48,12 @@ else :
     parser.print_help()
     exit()
 
-
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+    future_builtins.SensorType=options.SENSOR
+else :
+    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
+    parser.print_help()
+    exit()
 
 
 from ROOT import *
@@ -59,28 +72,28 @@ gStyle.SetOptFit(1111)
 
 aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,0,1,RunNumber,"tbtrack")
 
-
-scaler = 1
-method_name="DigitalCentroid"
+if(options.FEVENT):
+    first_event = int(options.FEVENT)
+else:
+    first_event = 0
 
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
 
-    if n_proc >= aDataSet.t_nEntries:
+    if n_proc >= aDataSet.t_nEntries - first_event:
         n_proc = -1
     if n_proc == -1:
-        n_proc = aDataSet.t_nEntries
+        n_proc = aDataSet.t_nEntries - first_event
 
 else :
-    n_proc= aDataSet.t_nEntries
+    n_proc= aDataSet.t_nEntries - first_event
 
-print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
+print "Running on run %i, will show maximum %i frames, starting at event %i" %(RunNumber,n_proc,first_event)
 
+canvas = TCanvas("canvas","",0,0,800,800)
 
-plot=0
-
-for i in range(n_proc) : 
-    aDataSet.PlotFrame(i,plot,npix)
+for i in range(first_event,first_event+n_proc) : 
+    aDataSet.PlotFrame(i,canvas,n_pix_min)
 
 
 

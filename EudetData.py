@@ -269,20 +269,21 @@ class EudetData:
  #           self.p_tot[index]=float(totvalue)/self.scale
  
  
-    def PlotFrame(self,i,plot,n_pix_min=1) : 
+    def PlotFrame(self,i,c,n_pix_min=0) : 
         
-	plot = TH2D("frame %i"%i,"frame %i"%i,npix_X,0,npix_X,npix_Y,0,npix_Y)
+	plot = TH2D("frame %i" %i, "frame %i" %i, npix_X, 0, npix_X, npix_Y, 0, npix_Y)
 	self.getEvent(i)
 	
-	if(len(self.p_col)>n_pix_min):
-	    for i,X in enumerate(self.p_col) : 
-	    	 plot.Fill(self.p_col[i],self.p_row[i],self.p_tot[i])
+	if(len(self.p_col) > n_pix_min):
+	    for j in xrange(len(self.p_col)) : 
+                plot.Fill(self.p_col[j],self.p_row[j],self.p_tot[j])
 	
-	    plot.Draw("colz")
-	    print "press enter for next frame"
+            plot.Draw("colz")
+            c.Update()
+	    print "press enter for next frame, ctrl-D to exit"
 	    a=raw_input()
 	else : 
-	    print "Skipping event %i, empty"%i
+	    print "Skipping event %i, does not have more than minimum number of hits (%i)" %(i,n_pix_min)
 
     def WriteReconstructedData(self,filename,dut=6) :
         outfile = TFile(filename,'recreate')
