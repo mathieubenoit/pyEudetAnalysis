@@ -168,7 +168,7 @@ def rms(x):
 #first parameter: a data set (class EudetData)
 #second parameter: position of the device under test in the list of planes (the timepix detector in our case)
 #
-def ComputeDetectorAcceptance(dataSet, dut=6, edges = 0):
+def ComputeDetectorAcceptance(dataSet, dut=20, edges = 0):
     n_tracks_in = 0
     last_time = time.time()
     for i,tracks in enumerate(dataSet.AllTracks) :
@@ -181,7 +181,7 @@ def ComputeDetectorAcceptance(dataSet, dut=6, edges = 0):
 
 
 
-def ComputeChargeDistance(dataSet,d=0.005,dut=6):
+def ComputeChargeDistance(dataSet,d=0.005,dut=20):
     # Compute the distance between the track and the edge of the pixel with highest energy
     # d: the value is used to remove the tracks which are in the corner of the pixel
 
@@ -224,7 +224,7 @@ def ComputeChargeDistance(dataSet,d=0.005,dut=6):
 #param 2: number of bins in the histograms
 #param 3: position of the device under test in the list of planes
 #
-def HitProbCorrelationX(dataSet,nbin,dut=6):
+def HitProbCorrelationX(dataSet,nbin,dut=20):
     HitProb_1_correlationX = TH2D("HitProb_1_correlationX_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,0.055,nbin,0.,0.055)
     #HitProb_1_correlationX.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_1_correlationX.GetXaxis().SetTitle("Track X position within pixel [mm]")
@@ -270,7 +270,7 @@ def HitProbCorrelationX(dataSet,nbin,dut=6):
 #param 2: number of bins in the histograms
 #param 3: position of the device under test in the list of planes
 #
-def HitProbCorrelationY(dataSet,nbin,dut=6):
+def HitProbCorrelationY(dataSet,nbin,dut=20):
     HitProb_1_correlationY = TH2D("HitProb_1_correlationY_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,0.055,nbin,0.,0.055)
     #HitProb_1_correlationY.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_1_correlationY.GetXaxis().SetTitle("Track Y position within pixel [mm]")
@@ -318,7 +318,7 @@ def HitProbCorrelationY(dataSet,nbin,dut=6):
 #param 2: number of bins in the histograms
 #param 3: position of the device under test in the list of planes
 #
-def TrackHitProb(dataSet,nbin,dut=6):
+def TrackHitProb(dataSet,nbin,dut=20):
     HitProb_1_track = TH2D("HitProb_1_track_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,0.055,nbin,0.,0.055)
     #HitProb_1_track.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_1_track.GetXaxis().SetTitle("Track X position within pixel [mm]")
@@ -361,7 +361,7 @@ def TrackHitProb(dataSet,nbin,dut=6):
 
     return HitProb_1_track,HitProb_2_track,HitProb_3_track,HitProb_4_track
 
-def TOTProfile(dataSet,nbin,dut=6):
+def TOTProfile(dataSet,nbin,dut=20):
     TOTProfileX_1 = TH2D("TOTProfileX_1_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,0.055,1000,0.,1000)
     #TOTProfileX_1.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileX_1.GetXaxis().SetTitle("Track X position within pixel [mm]")
@@ -470,7 +470,7 @@ def TOTProfile(dataSet,nbin,dut=6):
 #param 2: number of bins in the histograms
 #param 3: position of the device under test in the list of planes
 #
-def ClusterHitProb(dataSet,nbin,dut=6):
+def ClusterHitProb(dataSet,nbin,dut=20):
     HitProb_1_cluster = TH2D("HitProb_1_cluster_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,0.055,nbin,0.,0.055)
     #HitProb_1_cluster.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_1_cluster.GetXaxis().SetTitle("Cluster X position within pixel [mm]")
@@ -516,10 +516,10 @@ def ClusterHitProb(dataSet,nbin,dut=6):
     return HitProb_1_cluster,HitProb_2_cluster,HitProb_3_cluster,HitProb_4_cluster
 
 
-def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
+def TrackClusterCorrelation(dataSet,dut=20,imax=1000):
 
-    histox = TH2D("corX","Track-cluster x correlation",npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.,npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.)
-    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.,npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.)
+    histox = TH2D("corX","Track-cluster x correlation",npix_X,-5*(npix_X)*pitchX/2.,5*npix_X*pitchX/2.,5*npix_X,-5*(npix_X)*pitchX/2.,5*npix_X*pitchX/2.)
+    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-5*(npix_Y)*pitchY/2.,5*npix_Y*pitchY/2.,5*npix_Y,-5*(npix_Y)*pitchY/2.,5*npix_Y*pitchY/2.)
 
     for h in [histox,histoy] :
         h.GetXaxis().SetTitle("Cluster position (mm)")
@@ -531,8 +531,10 @@ def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
             print "Correlation, event %i %f s elapsed"%(i,time.time()-last_time)
 
         for track in tracks :
-            if(i<len(dataSet.AllClusters)):
-	        for cluster in dataSet.AllClusters[i]:
+            for cluster in dataSet.AllClusters[i]:
+                    #track.Print()
+                    #cluster.Print()
+                
                     histox.Fill(cluster.absX, track.trackX[track.iden.index(dut)])
                     histoy.Fill(cluster.absY, track.trackY[track.iden.index(dut)])
 
@@ -540,7 +542,7 @@ def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
 
 
 
-def TotalMeanFunctionX(Translations,Rotations,aDataDet,nevents,skip,cut = 0.1,dut=6):
+def TotalMeanFunctionX(Translations,Rotations,aDataDet,nevents,skip,cut = 0.5,dut=20):
 
     totaldist_evaluator = 0.
     n = 0
@@ -578,7 +580,7 @@ def TotalMeanFunctionX(Translations,Rotations,aDataDet,nevents,skip,cut = 0.1,du
     return fabs(totaldist_evaluator/n)
 
 
-def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.1,dut=6):
+def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.5,dut=20):
 
     totaldist_evaluator = 0.
     n = 0
@@ -616,7 +618,7 @@ def TotalMeanFunctionY(Translations,Tx,Rotations,aDataDet,nevents,skip,cut = 0.1
     return fabs(totaldist_evaluator/n)
 
 
-def TotalRotationFunctionZ(zang,Rotations,Translations,aDataDet,nevents,skip=1,cut=0.1,dut=6):
+def TotalRotationFunctionZ(zang,Rotations,Translations,aDataDet,nevents,skip=1,cut=0.25,dut=20):
     # function to find the best starting Z angle
     # returns the mertic to be minimised
 
@@ -635,7 +637,7 @@ def TotalRotationFunctionZ(zang,Rotations,Translations,aDataDet,nevents,skip=1,c
                     tmp[1] = tmp[1] + Translations[1]
                     distx = cluster.absX - tmp[0]
                     disty = cluster.absY - tmp[1]
-                    if sqrt(distx**2 + disty**2) < cut:
+                    if sqrt(disty**2 ) < cut:
                         n = n + 1
 
                     h_dist_x.Fill(distx)
@@ -657,13 +659,13 @@ def TotalRotationFunctionZ(zang,Rotations,Translations,aDataDet,nevents,skip=1,c
         print "TotalRotationFunctionZ: not enough events to fit"
         sigmaResY = 9.
 
-    result = sqrt(sigmaResX**2 + sigmaResY**2)/n
+    result = sqrt(sigmaResY**2)/n
     print "Evaluating for Rotation : %.9f %.9f %.9f [deg] Trans : %f %f  [mm] metric = %.9f  n = %i"%(Rotations[0],Rotations[1],Rotations[2],Translations[0],Translations[1],result,n)
 
     return result
 
 
-def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0.1,dut=6):
+def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0.1,dut=20):
 
     n = 0
     dist_tmp_x = []
@@ -705,7 +707,7 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
+def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=20):
 
     tmpx = TH1D("resX_2","Unbiased residual X, cluster size Y = 2",300,-0.150,0.150)
     
@@ -762,7 +764,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
+def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=20):
     
     tmpy = TH1D("resY_1","Unbiased residual Y, cluster size Y = 2",300,-0.150,0.150)
     for j,tracks in enumerate(dataSet.AllTracks) :
@@ -806,7 +808,7 @@ def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
 
 
 
-def TotalDistanceFunction(parameters,aDataDet,nevents,skip,cutx = 0.1, cuty = 0.1,dut=6):
+def TotalDistanceFunction(parameters,aDataDet,nevents,skip,cutx = 0.1, cuty = 0.1,dut=20):
 
     totaldist_evaluator = 0.
     n = 0
@@ -852,13 +854,13 @@ def ReadAlignment(filename) :
     return alignments
 
 
-def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,Rotations=[0,0,0]):
+def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=20,Rotations=[0,0,0]):
     # will plot the x and y distance between every cluster-track pair in an event
     # returns the central values of the x, y bins with the most entries, and hists
 
     last_time=time.time()
-    h_dist_x = TH1D("h_dist_x","Track-cluster distance x",800,-20.,20.)
-    h_dist_y = TH1D("h_dist_y","Track-cluster distance y",800,-20.,20.)
+    h_dist_x = TH1D("h_dist_x","Track-cluster distance x",800,-500.,500.)
+    h_dist_y = TH1D("h_dist_y","Track-cluster distance y",800,-500.,500.)
                     
     for i in xrange(nevents):
         if i%skip == 0:
@@ -866,6 +868,7 @@ def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,R
             for cluster in clusters:
                 for track in aDataSet.AllTracks[i]:
 
+ 		    
                     tmp=[track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)],0]
                     tmp=np.dot(RotationMatrix(Rotations),tmp)
             
@@ -902,14 +905,33 @@ def PerformAlignement(aDataSet, boundary) :
     return res.x[0:3],res.x[3:]
 
 
-def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,Rotations=[0,0,0]) :
+def PerfomZRotationAlignement(aDataSet,boundary,nevent,skip,cut = 0.3,filename='Alignment.txt',gtol=1e-6,Rotations=[0,0,0]) :
     x_tx = np.array([0.])
     x_ty = np.array([0.])
     xr= np.array(Rotations)
 
     x_txang = [0.]
     argTuple = [0.,0.],[0.,0.],aDataSet,nevent,skip,cut
-    resrx = minimize(TotalRotationFunctionZ,x_txang,argTuple,method='Nelder-Mead',options={'xtol': 1e-6,'disp': True})
+    resrx = minimize(TotalRotationFunctionZ,x_txang,argTuple,method='BFGS',options={'disp' : True ,'gtol': 1e-6, 'eps':2,'disp': True})
+    rZ = resrx.x[0]
+    print "Starting guess Z angle : %f"%rZ
+      
+    xr= np.array([0,0,rZ])   
+    
+    f = open(filename,'a')
+    f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(0,0,rZ,0,0))
+    f.close()
+    
+    return xr ,[0,0,0] 
+
+def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.3,filename='Alignment.txt',gtol=1e-6,Rotations=[0,0,0]) :
+    x_tx = np.array([0.])
+    x_ty = np.array([0.])
+    xr= np.array(Rotations)
+
+    x_txang = [0.]
+    argTuple = [0.,0.],[0.,0.],aDataSet,nevent,skip,cut
+    resrx = minimize(TotalRotationFunctionZ,x_txang,argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     rZ = resrx.x[0]
     print "Starting guess Z angle : %f"%rZ
       
@@ -921,7 +943,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     print "best guess for rotation matrix: resr.x", resr.x
     if resr.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        b=raw_input()
+        #b=raw_input()
 
 
     argTuple = resr.x,aDataSet,nevent,skip,cut  
@@ -930,7 +952,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     print "best guess for x translation: rest.x", rest.x
     if rest.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        b=raw_input() 
+        #b=raw_input() 
 
     argTuple = rest.x[0],resr.x,aDataSet,nevent,skip,cut
     rest2= minimize(TotalMeanFunctionY,x_ty, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
@@ -938,7 +960,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     print "best guess for y translation: rest2.x", rest2.x
     if rest2.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        b=raw_input() 
+        #b=raw_input() 
 
     f = open(filename,'a')
     f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(resr.x[0],resr.x[1],resr.x[2],rest.x[0],rest2.x[0]))
@@ -995,7 +1017,7 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
     return bestsigma,bestsigma
 
 
-def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :
+def ApplyAlignment(dataSet,translations,rotations,dut=20,filename="Alignment.txt") :
 
     print "Applying Alignment with  Rotation : %0.10f %0.10f %0.10f [deg] Trans : %0.10f %0.10f  [mm]"%(rotations[0],rotations[1],rotations[2],translations[0],translations[1])
     RotMat = RotationMatrix(rotations)
@@ -1009,7 +1031,7 @@ def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt"
             Tracks[index].trackY[track.iden.index(dut)] = tmp[1] + translations[1]
 #             track.trackZ[track.iden.index(dut)] = tmp[2] + translations[2]
 
-def ApplyAlignment_at_event(i,dataSet,translations,rotations,dut=6) :
+def ApplyAlignment_at_event(i,dataSet,translations,rotations,dut=20) :
 
     #print "Applying Alignment with  Rotation : %0.10f %0.10f %0.10f [deg] Trans : %0.10f %0.10f  [mm]"%(rotations[0],rotations[1],rotations[2],translations[0],translations[1])
     RotMat = RotationMatrix(rotations)
@@ -1031,7 +1053,7 @@ def ApplyAlignment_at_event(i,dataSet,translations,rotations,dut=6) :
 #param 4: position of the device under test in the list of planes
 #param 5: name of the file in which we store the results of the sigma optimisation
 #
-def ApplyEtaCorrection(dataSet,ressigmachargeX,ressigmachargeY,dut=6,filename="EtaCorrection.txt") :
+def ApplyEtaCorrection(dataSet,ressigmachargeX,ressigmachargeY,dut=20,filename="EtaCorrection.txt") :
 
     print "Applying Eta Correction with  chargeSigmaX : %f [mm] chargeSigmaY : %f [mm]"%(float(ressigmachargeX),float(ressigmachargeY))
 
@@ -1113,8 +1135,8 @@ def EdgeEfficiency(aDataSet,dut) :
 
 
 def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath):
-    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,6,edge)
-    n_tracks_in_main = ComputeDetectorAcceptance(aDataSet,6,0)
+    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,20,edge)
+    n_tracks_in_main = ComputeDetectorAcceptance(aDataSet,20,0)
     n_tracks_in_edge = n_tracks_in_total - n_tracks_in_main
 
     print "n_tracks_in_total", n_tracks_in_total

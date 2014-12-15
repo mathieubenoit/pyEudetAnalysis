@@ -89,7 +89,7 @@ else :
     parser.print_help()
     exit()
 
-if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix" or options.SENSOR=="FEI4"):
     future_builtins.SensorType=options.SENSOR
 else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
@@ -118,6 +118,21 @@ gStyle.SetOptFit(1111)
 
 aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,RunNumber,"tbtrack")
 
+# Computing Chi2 cut and plotting Chi2 distribution
+h_chi2,h_chi2ndof = aDataSet.GetChi2Cut(0.5)
+
+can_chi2 = TCanvas()
+h_chi2.Draw("")
+can_chi2.SetLogx()
+can_chi2.SetLogy()
+can_chi2.SaveAs("%s/Run%i/Chi2_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+
+can_chi2ndof = TCanvas()
+h_chi2ndof.Draw("")
+can_chi2ndof.SetLogx()
+can_chi2ndof.SetLogy()
+can_chi2ndof.SaveAs("%s/Run%i/Chi2ndof_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+
 
 if(options.NEVENT):
     if int(options.NEVENT) > aDataSet.p_nEntries or int(options.NEVENT) == -1:
@@ -133,6 +148,8 @@ if n_proc > 10000:
     skip = int((n_proc)/10000.)
 else:
     skip = 1
+    
+skip =1
 print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber,method_name,n_proc,skip)
 
 dot = AlignmentPath.rfind('.')
@@ -188,7 +205,7 @@ for i in range(0,n_proc) :
 
 last_time=time.time()
 
-tccorx1,tccory1 = TrackClusterCorrelation(aDataSet,6,n_proc)
+tccorx1,tccory1 = TrackClusterCorrelation(aDataSet,20,n_proc)
 tccorx1.SetName("tccor1")
 tccory1.SetName("tccory1")
 cantccorx1 = TCanvas()
@@ -201,9 +218,9 @@ print "Performing prealignment"
 if future_builtins.SensorType=="Timepix3" or future_builtins.SensorType=="CLICpix": 
     print "WARNING adding 180 degree rotation around Z for Timepix3 and CLICpix data"
     print "WARNING please fix this if this is not what is wanted"
-    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,180])
+    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,20,[0,0,180])
 else :
-    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,6,[0,0,0])
+    alignment_constants, prealix, prealiy = PerformPreAlignment(aDataSet,n_proc,skip,AlignmentPath,20,[0,0,0])
 
 canprealix = TCanvas()
 prealix.Draw()
@@ -214,12 +231,13 @@ distances_histo_afterpreali = TH1F("distances_histo_afterpreali","",100,0.0,1.0)
 
 last_time = time.time()
 
+
 for i in range(0,n_proc) :
 
     for alignment in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignment[3],alignment[4],0],[alignment[0],alignment[1],alignment[2]])
 
-    aDataSet.FindMatchedCluster(i,0.3,6,distances_histo_afterpreali)
+    aDataSet.FindMatchedCluster(i,0.5,20,distances_histo_afterpreali)
     a,b=aDataSet.ComputeResiduals(i)
     if i%1000 ==0 :
         print "Event %d"%i
@@ -231,7 +249,7 @@ candist.SetLogy()
 distances_histo_afterpreali.GetXaxis().SetTitle("Track-cluster distance (mm)")
 distances_histo_afterpreali.Draw()
 
-tccorx2,tccory2 = TrackClusterCorrelation(aDataSet,6,n_proc)
+tccorx2,tccory2 = TrackClusterCorrelation(aDataSet,20,n_proc)
 tccorx2.SetName("tccorx2")
 tccory2.SetName("tccory2")
 cancorx2 = TCanvas()
@@ -240,13 +258,15 @@ cancory2 = TCanvas()
 tccory2.Draw("colz")
 
 
-niter = 2
+niter = 5
 for i in range(niter) :
-    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.05,AlignmentPath,1e-5,[0,0,0])
+    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.5,AlignmentPath,1e-6,[0,0,0])
     ApplyAlignment(aDataSet,rest,resr)
 
 
-tccorx3,tccory3 = TrackClusterCorrelation(aDataSet,6,n_proc)
+PerfomZRotationAlignement(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.3,AlignmentPath,1e-6,[0,0,0])
+
+tccorx3,tccory3 = TrackClusterCorrelation(aDataSet,20,n_proc)
 tccorx3.SetName("tccorx3")
 tccory3.SetName("tccory3")
 cancorx3 = TCanvas()
@@ -260,7 +280,7 @@ distances_histo_afterfullali = TH1F("distances_histo_afterfullali","",100,0.0,1.
 
 for i in range(0,n_proc) :
 
-    aDataSet.FindMatchedCluster(i,0.3,6,distances_histo_afterfullali)
+    aDataSet.FindMatchedCluster(i,0.1,20,distances_histo_afterfullali)
     a,b=aDataSet.ComputeResiduals(i)
     n_matched+=a
     if i%1000 ==0 :
@@ -273,20 +293,20 @@ candist2.SetLogy()
 distances_histo_afterfullali.GetXaxis().SetTitle("Track-cluster distance (mm)")
 distances_histo_afterfullali.Draw()
       
-resX_hist = TH1F("resX_hist","",100,-0.5,0.5)
-resY_hist = TH1F("resY_hist","",100,-0.5,0.5)
+resX_hist = TH1F("resX_hist","",200,-1.0,1.0)
+resY_hist = TH1F("resY_hist","",200,-1.0,1.0)
 resX2hit_hist = TH1F("resX2hit_hist","",100,-0.1,0.1)
 resY2hit_hist = TH1F("resY2hit_hist","",100,-0.1,0.1)
 for i,clusters in enumerate(aDataSet.AllClusters[0:n_proc]) :
     for cluster in clusters :
         for track in aDataSet.AllTracks[i] :
-            resX_hist.Fill(cluster.absX - track.trackX[track.iden.index(6)])
-            resY_hist.Fill(cluster.absY - track.trackY[track.iden.index(6)])
+            resX_hist.Fill(cluster.absX - track.trackX[track.iden.index(20)])
+            resY_hist.Fill(cluster.absY - track.trackY[track.iden.index(20)])
             if cluster.size==2:
                 if cluster.sizeX==2 and cluster.sizeY==1:
-                    resX2hit_hist.Fill(cluster.absX - track.trackX[track.iden.index(6)])
+                    resX2hit_hist.Fill(cluster.absX - track.trackX[track.iden.index(20)])
                 if cluster.sizeX==1 and cluster.sizeY==2:
-                    resY2hit_hist.Fill(cluster.absY - track.trackY[track.iden.index(6)])
+                    resY2hit_hist.Fill(cluster.absY - track.trackY[track.iden.index(20)])
 
 c_resX = TCanvas()
 resX_hist.Fit("gaus")

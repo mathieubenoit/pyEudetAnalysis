@@ -86,8 +86,9 @@ class EudetData:
     #hit_map = [[0]*npix_Y]*npix_X
     #frequency_map = [[0.0]*npix_Y]*npix_X
 
-    hit_map =[[0 for x in xrange(npix_X)] for x in xrange(npix_Y)]
-    frequency_map = [[0 for x in xrange(npix_X)] for x in xrange(npix_Y)]
+    hit_map =       [[0 for x in xrange(npix_Y)] for y in xrange(npix_X)]
+    frequency_map = [[0 for x in xrange(npix_Y)] for y in xrange(npix_X)]
+        
     hotpixels = []
 
     mode = ""
@@ -168,9 +169,9 @@ class EudetData:
         unique_events = 0
 
         histo_nhits = TH1D("nhit","N Pixel Fires",40,0,39)
-        histo_hitpixel = TH2D("hit","Hit Pixel Map",256,0,255,256,0,255)
+        histo_hitpixel = TH2D("hit","Hit Pixel Map",npix_Y,0,npix_Y-1,npix_X,0,npix_X-1)
         histo_frequency = TH1D("freq","Pixel Firing Frequency",10000,0,1)
-        histo_hotpixel = TH2D("hot","Hot Pixel Map",256,0,255,256,0,255)
+        histo_hotpixel = TH2D("hot","Hot Pixel Map",npix_Y,0,npix_Y-1,npix_X,0,npix_X-1)
 
         if Nevents>self.p_nEntries or Nevents==-1:
             n_max = self.p_nEntries
@@ -210,7 +211,7 @@ class EudetData:
             prev_pixel_xhits = pixel_x_hits
 
             for j in range(len(self.p_row)) :
-                self.hit_map[self.p_col[j]][self.p_row[j]] += 1
+                self.hit_map[self.p_row[j]][self.p_col[j]] += 1
                 histo_hitpixel.Fill(self.p_col[j],self.p_row[j])
 
         # loop through hitmap
@@ -218,8 +219,7 @@ class EudetData:
         print "Ran over", n_max, "events, found", unique_events, "unique pixel maps"
         for i in range(npix_X):
             for j in range(npix_Y) :
-
-                self.frequency_map[i][j]=self.hit_map[i][j]*(1.0/float(unique_events))
+		self.frequency_map[i][j]=self.hit_map[i][j]*(1.0/float(unique_events))
                 histo_nhits.Fill(self.hit_map[i][j])
                 histo_frequency.Fill(self.frequency_map[i][j])
 
@@ -285,7 +285,7 @@ class EudetData:
 	else : 
 	    print "Skipping event %i, does not have more than minimum number of hits (%i)" %(i,n_pix_min)
 
-    def WriteReconstructedData(self,filename,dut=6) :
+    def WriteReconstructedData(self,filename,dut=20) :
         outfile = TFile(filename,'recreate')
         self.DumpTrackTree(outfile,dut)
         self.DumpClusterTree(outfile,dut)
@@ -358,7 +358,7 @@ class EudetData:
 
 
 
-    def DumpTrackTree(self,outfile,dut=6):
+    def DumpTrackTree(self,outfile,dut=20):
 
         outfile.cd()
         trackTree = TTree('tracks','TestBeam track tree')
@@ -423,7 +423,7 @@ class EudetData:
         outfile.Write()
 
 
-    def DumpClusterTree(self,outfile,dut=6):
+    def DumpClusterTree(self,outfile,dut=20):
 
         outfile.cd()
 
@@ -516,7 +516,7 @@ class EudetData:
                 clusterTree.Fill()
         outfile.Write()
 
-    def IsInEdges(self,track,dut=6):
+    def IsInEdges(self,track,dut=20):
         is_in = False
         
 	if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
@@ -526,14 +526,14 @@ class EudetData:
         return is_in
 
 
-    def IsInGoodRegion(self,track,dut=6) : 
+    def IsInGoodRegion(self,track,dut=20) : 
     
         if (track.trackX[track.iden.index(dut)]>=((pitchX*npix_X)/2-4*pitchX) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.)) :
  	    return true
 	else : 
 	    return false
 
-    def ComputeResiduals(self,i,dut=6) :
+    def ComputeResiduals(self,i,dut=20) :
 
         nmatch_in_main = 0.
         nmatch_in_edge = 0.
@@ -635,6 +635,8 @@ class EudetData:
 
         nTrackParams_tmp=self.t_nTrackParams
 
+        trackNum_tmp=[0]
+
         if len(trackNum_tmp)>0 :
             for j in range(max(trackNum_tmp)+1) :
                 aTrack = Track()
@@ -642,21 +644,22 @@ class EudetData:
                 #print "nTrackParam : %i len(trackNum %i)"%(nTrackParams_tmp,max(trackNum_tmp)+1)
                 aTrack.trackX = posX_tmp[j*ndata:j*ndata+ndata]
                 aTrack.trackY = posY_tmp[j*ndata:j*ndata+ndata]
-                for index,element in enumerate(aTrack.trackX) :
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-                    aTrack.trackX[index] = aTrack.trackX[index]-npix_X*pitchX/2.-pitchX/2.
-                    aTrack.trackY[index] = aTrack.trackY[index]-npix_Y*pitchY/2.-pitchY/2.
-                aTrack.iden = iden_tmp[j*ndata:j*ndata+ndata]
-                aTrack.chi2 = chi2_tmp[j*ndata:j*ndata+ndata]
-                aTrack.trackNum = trackNum_tmp[j*ndata:j*ndata+ndata]
-                aTrack.ndof = ndof_tmp[j*ndata:j*ndata+ndata]
-                aTrack.dxdz = dxdz_tmp[j*ndata:j*ndata+ndata]
-                aTrack.dydz = dydz_tmp[j*ndata:j*ndata+ndata]
-
-                if(aTrack.chi2[0]<self.Chi2_Cut):
-                    tracks.append(aTrack)
-
-                #print aTrack.chi2
+                
+        for index,element in enumerate(aTrack.trackX) :
+            aTrack.trackX[index] = aTrack.trackX[index]-npix_X*pitchX/2.-pitchX/2.
+            aTrack.trackY[index] = aTrack.trackY[index]-npix_Y*pitchY/2.-pitchY/2.
+                
+            aTrack.iden = iden_tmp[j*ndata:j*ndata+ndata]
+            aTrack.chi2 = chi2_tmp[j*ndata:j*ndata+ndata]
+            aTrack.trackNum = trackNum_tmp[j*ndata:j*ndata+ndata]
+            aTrack.ndof = ndof_tmp[j*ndata:j*ndata+ndata]
+            aTrack.dxdz = dxdz_tmp[j*ndata:j*ndata+ndata]
+            aTrack.dydz = dydz_tmp[j*ndata:j*ndata+ndata]
+            
+            #print aTrack.chi2
+            #print self.Chi2_Cut
+            if(aTrack.chi2[0]<self.Chi2_Cut):
+                tracks.append(aTrack)
         self.AllTracks.append(tracks)
 
 
@@ -671,16 +674,16 @@ class EudetData:
     #--------------------------------------------------------------- trackNum=[]
     #----------------------------------------------------------------- cluster=0
 
-    def FindMatchedCluster(self,i,r_max,dut=6,distances_histo=None,filter_cluster=True,TrackingRes=0.003) :
+    def FindMatchedCluster(self,i,r_max,dut=20,distances_histo=None,filter_cluster=False,TrackingRes=0.03) :
         # find the clusters closest to the tracks in this event
         # clusters are matched to tracks using GetPixelResiduals
         # r_max: maximum radial distance allowed between track and any pixel of the cluster
 
         try : 
-		clusters_tmp = self.AllClusters[i]
+            clusters_tmp = self.AllClusters[i]
         except: 
-		clusters_tmp = []
-	matched_clusters = []
+            clusters_tmp = []
+        matched_clusters = []
         good_count = 0
 
         for track in self.AllTracks[i] :
@@ -689,6 +692,10 @@ class EudetData:
                 distances = []
 
                 for cluster in clusters_tmp :
+                    
+                    #cluster.Print()
+                    #track.Print()
+                    
                     mdr, mdx, mdy = cluster.GetPixelResiduals(track.trackX[dut_iden],track.trackY[dut_iden])
                     distances.append(mdr)
 
@@ -698,6 +705,9 @@ class EudetData:
                 cluster = clusters_tmp[distances.index(min(distances))]
 
                 if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
+                   #track.Print()
+                    #cluster.Print()
+                    
                     if (min(distances) < r_max) :
                         # matched cluster
                         cluster.id = good_count
@@ -834,6 +844,8 @@ class EudetData:
         row_tmp = [s for s in self.p_row]
         col_tmp = [s for s in self.p_col]
         tot_tmp = [s for s in self.p_tot]
+	
+
 
         # remove hot pixels
         hpindex = 0
@@ -856,9 +868,9 @@ class EudetData:
             print "Event", i, "not beng clustered,", len(col_tmp), "hit pixels"
             clusters=[]
 
-
+	
         for cluster in clusters :
-            cluster.Statistics()	
+            cluster.Statistics()
 	
         clusters = [cluster for cluster in clusters if cluster.totalTOT>0]
 

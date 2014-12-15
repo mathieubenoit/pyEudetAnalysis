@@ -89,12 +89,13 @@ else :
     exit()
 
 future_builtins.SensorType= "Timepix"
-if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"or options.SENSOR=="FEI4" ):
     future_builtins.SensorType=options.SENSOR
 else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
     parser.print_help()
     exit()
+    
     
     
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
@@ -191,7 +192,7 @@ print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n
 
 # EdgeEfficiency
 if aDataSet.edge != 0.0:
-    TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge = EdgeEfficiency(aDataSet,6)
+    TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge = EdgeEfficiency(aDataSet,20)
 
     eff_can = TCanvas()
     MatchedTrack.Draw("")
@@ -241,7 +242,7 @@ else:
     ressigmachargeY=0.01
 
 for i in range(n_proc-1) :
-    aDataSet.FindMatchedCluster(i,0.1,6)
+    aDataSet.FindMatchedCluster(i,0.3,20)
     aDataSet.ComputePosition(i,method_name,(ressigmachargeX+ressigmachargeY)/2.0)
     m,me = aDataSet.ComputeResiduals(i)
     n_matched_in_main += m
@@ -306,7 +307,7 @@ cClusterSizeCounter_percent.SaveAs("%s/Run%i/%s/ClusterSizeCounter_percent.pdf"%
 
 
 last_time = time.time()
-hx,hy = TrackClusterCorrelation(aDataSet,6,n_proc)
+hx,hy = TrackClusterCorrelation(aDataSet,20,n_proc)
 print "Elapsed time for Correlation : %f s"%(time.time()-last_time)
 
 h1_style(hx,1)
@@ -329,13 +330,13 @@ relX_vs_relY.GetXaxis().SetTitle("Cluster relX position within pixel [mm]")
 relX_vs_relY.GetYaxis().SetRangeUser(-0.,14.08)
 relX_vs_relY.GetYaxis().SetTitle("Cluster relY position within pixel [mm]")
 
-HitProb_1_cluster_binning1m,HitProb_2_cluster_binning1m,HitProb_3_cluster_binning1m,HitProb_4_cluster_binning1m = ClusterHitProb(aDataSet,55,6)
-HitProb_1_cluster_binning2m,HitProb_2_cluster_binning2m,HitProb_3_cluster_binning2m,HitProb_4_cluster_binning2m = ClusterHitProb(aDataSet,28,6)
+HitProb_1_cluster_binning1m,HitProb_2_cluster_binning1m,HitProb_3_cluster_binning1m,HitProb_4_cluster_binning1m = ClusterHitProb(aDataSet,55,20)
+HitProb_1_cluster_binning2m,HitProb_2_cluster_binning2m,HitProb_3_cluster_binning2m,HitProb_4_cluster_binning2m = ClusterHitProb(aDataSet,28,20)
 
-HitProb_1_correlationX,HitProb_2_correlationX,HitProb_3_correlationX,HitProb_4_correlationX = HitProbCorrelationX(aDataSet,55,6)
-HitProb_1_correlationY,HitProb_2_correlationY,HitProb_3_correlationY,HitProb_4_correlationY = HitProbCorrelationY(aDataSet,55,6)
+HitProb_1_correlationX,HitProb_2_correlationX,HitProb_3_correlationX,HitProb_4_correlationX = HitProbCorrelationX(aDataSet,55,20)
+HitProb_1_correlationY,HitProb_2_correlationY,HitProb_3_correlationY,HitProb_4_correlationY = HitProbCorrelationY(aDataSet,55,20)
 
-TOTProfileX_1_cluster_binning1m,TOTProfileX_2_cluster_binning1m,TOTProfileX_3_cluster_binning1m,TOTProfileX_4_cluster_binning1m,TOTProfileY_1_cluster_binning1m,TOTProfileY_2_cluster_binning1m,TOTProfileY_3_cluster_binning1m,TOTProfileY_4_cluster_binning1m,TOTProfileX,TOTProfileY,TOTProfile = TOTProfile(aDataSet,55,6)
+TOTProfileX_1_cluster_binning1m,TOTProfileX_2_cluster_binning1m,TOTProfileX_3_cluster_binning1m,TOTProfileX_4_cluster_binning1m,TOTProfileY_1_cluster_binning1m,TOTProfileY_2_cluster_binning1m,TOTProfileY_3_cluster_binning1m,TOTProfileY_4_cluster_binning1m,TOTProfileX,TOTProfileY,TOTProfile = TOTProfile(aDataSet,55,20)
 
 
 h1_style(HitProb_1_cluster_binning1m)
@@ -791,8 +792,8 @@ can11.SaveAs("%s/Run%i/%s/relX_vs_relY.pdf"%(PlotPath,RunNumber,method_name))
 
 
 last_time = time.time()
-HitProb_1_track_binning1m,HitProb_2_track_binning1m,HitProb_3_track_binning1m,HitProb_4_track_binning1m = TrackHitProb(aDataSet,55,6)
-HitProb_1_track_binning2m,HitProb_2_track_binning2m,HitProb_3_track_binning2m,HitProb_4_track_binning2m = TrackHitProb(aDataSet,28,6)
+HitProb_1_track_binning1m,HitProb_2_track_binning1m,HitProb_3_track_binning1m,HitProb_4_track_binning1m = TrackHitProb(aDataSet,55,20)
+HitProb_1_track_binning2m,HitProb_2_track_binning2m,HitProb_3_track_binning2m,HitProb_4_track_binning2m = TrackHitProb(aDataSet,28,20)
 print "Elapsed time for hitprob plots : %f s"%(time.time()-last_time)
 
 h1_style(HitProb_1_track_binning1m)

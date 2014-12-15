@@ -98,14 +98,14 @@ class Cluster:
             self.GetDigitalCentroid()
         else :
             for index,tot_tmp in enumerate(self.tot) :
-                self.relX+=(self.col[index]*pitchX)*tot_tmp
-                self.relY+=(self.row[index]*pitchY)*tot_tmp
+                self.relX+=(self.col[index]*pitchY)*tot_tmp
+                self.relY+=(self.row[index]*pitchX)*tot_tmp
 
-            self.relX = self.relX/self.totalTOT + pitchX/2.
-            self.relY = self.relY/self.totalTOT + pitchY/2.
+            self.relX = self.relX/self.totalTOT + pitchY/2.
+            self.relY = self.relY/self.totalTOT + pitchX/2.
 
-            self.absX=self.relX - npix_X*pitchX/2.
-            self.absY=self.relY - npix_Y*pitchY/2.
+            self.absX=self.relX - npix_Y*pitchY/2.
+            self.absY=self.relY - npix_X*pitchX/2.
             self.absZ=0
 
 #
@@ -115,14 +115,14 @@ class Cluster:
         self.relX=0.
         self.relY=0.
         for index,col_tmp in enumerate(self.col) :
-            self.relX+=(self.col[index]*pitchX)
-            self.relY+=(self.row[index]*pitchY)
+            self.relX+=(self.col[index]*pitchY)
+            self.relY+=(self.row[index]*pitchX)
 
-        self.relX = self.relX/len(self.col) + pitchX/2.
-        self.relY = self.relY/len(self.row) + pitchY/2.
+        self.relX = self.relX/len(self.col) + pitchY/2.
+        self.relY = self.relY/len(self.row) + pitchX/2.
 
-        self.absX=self.relX - npix_X*pitchX/2.
-        self.absY=self.relY - npix_Y*pitchY/2.
+        self.absX=self.relX - npix_Y*pitchY/2.
+        self.absY=self.relY - npix_X*pitchX/2.
         self.absZ=0
 
 #
@@ -268,8 +268,8 @@ class Cluster:
         dx = []
         dy = []
         for i in xrange(self.size):
-            resX = self.col[i]*pitchX + pitchX/2. - halfChip_X - trackx
-            resY = self.row[i]*pitchY + pitchY/2. - halfChip_Y - tracky
+            resX = self.col[i]*pitchY + pitchY/2. - halfChip_X - trackx
+            resY = self.row[i]*pitchX + pitchX/2. - halfChip_Y - tracky
 
             dr.append(sqrt(resX**2 + resY**2))
             dx.append(resX)

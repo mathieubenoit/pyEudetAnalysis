@@ -89,7 +89,7 @@ else :
     exit()
 
 future_builtins.SensorType= "Timepix"
-if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"or options.SENSOR=="FEI4" ):
     future_builtins.SensorType=options.SENSOR
 else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
@@ -210,7 +210,7 @@ for i in range(0,n_proc) :
     for alignement in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
 
-    aDataSet.FindMatchedCluster(i,0.1,6,distances_histo)
+    aDataSet.FindMatchedCluster(i,0.5,20,distances_histo)
     m,me=aDataSet.ComputeResiduals(i)
     n_matched+=m
     n_matched_edge+=me
@@ -232,4 +232,4 @@ root_file = "%s/Run%i/%s/pyEudetNtuple_run%i_%s.root"%(PlotPath,RunNumber,method
 os.system("rm %s"%root_file)
 
 print "Writing reconstructed data to %s"%root_file
-aDataSet.WriteReconstructedData(root_file,6)
+aDataSet.WriteReconstructedData(root_file,20)

@@ -28,8 +28,19 @@ elif SensorType=="CLICpix" :
     print "Using CLICpix detector"
 
 
-halfChip_X = npix_X*pitchX/2.
-halfChip_Y = npix_Y*pitchY/2.
+elif SensorType=="FEI4" : 
+# CLICPix Specifications
+    pitchX = 0.050
+    pitchY = 0.250
+    npix_X = 336
+    npix_Y = 80
+    
+    print "Using FEI4 detector"
+    
+    
+
+halfChip_X = npix_Y*pitchY/2.
+halfChip_Y = npix_X*pitchX/2.
 
 # sigma = 0.015
 um = 1e-3
